@@ -267,6 +267,43 @@ if (fs.existsSync(coreDir)) {
   } catch (_) {}
 }
 
+// v3.5 Copilot lean mode. Under COPILOT=1, a casual session should NOT be
+// handed the full 8-step "read harness-progress + the 63KB feature_list + git
+// log + run init.sh + select a feature + start working" imperative — that turns
+// every prompt into a dozen tool calls and balloons context (measured: ~95k
+// extra tokens + a file-read cascade on a trivial prompt). Instead we emit a
+// minimal status payload and defer the heavyweight startup to an explicit
+// /auto. The FULL payload is still produced when:
+//   - not running under Copilot (COPILOT unset) → Claude Code behavior unchanged
+//   - auto-advance is set (headless /auto dogfood) → the agent SHOULD start now
+const leanMode = process.env.COPILOT === '1' && !autoAdvance;
+
+if (leanMode) {
+  const leanLines = [
+    '## Forge SessionStart — Copilot lean mode (BRD v3.5)',
+    '',
+    `Project root: ${projectDir}`,
+    `feature_list.json: ${passing}/${total} passing, ${failing} failing`,
+    `Next up: ${nextLine}`,
+  ];
+  if (archApprovedBlock) leanLines.push('', archApprovedBlock);
+  leanLines.push(
+    '',
+    'This is the Claude Harness Forge under Copilot. To keep sessions cheap, the',
+    'full startup sequence (reading harness-progress.txt, the feature_list, git',
+    'history, running init.sh, and beginning autonomous work) is **deferred** —',
+    'no startup file reads have been performed. Run `/auto` to start the',
+    'autonomous build loop, or give a specific task. Learned/compiled rules and',
+    'core memory load with `/auto`, not now.',
+    '',
+    'Hard rule (BRD §3.8): never flip a feature_list.json `passes` field without a',
+    'verification artifact under verification/<id>.{png,json} — the e2e-gate and',
+    'feature-edit-guard hooks will reject otherwise.'
+  );
+  emit({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: leanLines.join('\n') } });
+  process.exit(0);
+}
+
 const lines = [
   '## BRD v3.0 SessionStart — coding-agent startup (BRD §3.1)',
   '',

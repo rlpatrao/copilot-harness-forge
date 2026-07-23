@@ -95,6 +95,23 @@ else
   fail "session-start did not emit valid hookSpecificOutput" "rc=$rc"
 fi
 
+# --- 4b. session-start: COPILOT=1 lean mode drops the 8-step read-everything imperative ---
+lean=$(printf '{"cwd":"%s","session_id":"test"}' "$PWD" | COPILOT=1 node hooks/session-start.js)
+full=$(printf '{"cwd":"%s","session_id":"test"}' "$PWD" | node hooks/session-start.js)
+if echo "$full" | grep -q "8-step startup" && ! echo "$lean" | grep -q "8-step startup" && echo "$lean" | grep -q "Copilot lean mode"; then
+  ok "session-start COPILOT=1 lean mode omits 8-step imperative (full mode keeps it)"
+else
+  fail "session-start lean mode not applied under COPILOT=1" "$(echo "$lean" | head -c 160)"
+fi
+
+# --- 4c. auto-advance overrides lean: headless /auto still gets the full imperative ---
+auto=$(printf '{"cwd":"%s","session_id":"test"}' "$PWD" | COPILOT=1 AUTO_ADVANCE_ON_ARCHITECTURE_APPROVED=1 node hooks/session-start.js)
+if echo "$auto" | grep -q "8-step startup"; then
+  ok "session-start COPILOT=1 + AUTO_ADVANCE keeps full startup (headless /auto)"
+else
+  fail "session-start auto-advance should keep full imperative even under COPILOT" "$(echo "$auto" | head -c 160)"
+fi
+
 # --- 5. dangerous-patterns: blocks rm -rf / ---
 out=$(echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' | node hooks/dangerous-patterns.js 2>&1)
 rc=$?
