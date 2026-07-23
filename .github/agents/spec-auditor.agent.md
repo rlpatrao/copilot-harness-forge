@@ -1,7 +1,7 @@
 ---
 name: spec-auditor
 description: Spawned on a failed ratchet (BRD §4.7). Walks back through phases to find the earliest spec gap whose tightening would have prevented the failure. Proposes a spec amendment with diff. Read-only — the Critic validates and the orchestrator applies.
-model: claude-opus
+model: claude-opus-4.7
 tools: read, glob, grep
 # generated-from: agents/spec-auditor.md
 # model-source: workflows.yaml:spec-auditor.primary (anthropic/claude-opus-4-7)

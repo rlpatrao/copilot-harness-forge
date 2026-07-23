@@ -17,9 +17,10 @@ repo. It is intentionally thin: the operating contract is not duplicated here.
 This repo ships as a Copilot install, not only a `claude --plugin-dir` plugin:
 
 - **Agents** → `.github/agents/*.agent.md`
+- **Skills** → `.github/skills/*/SKILL.md`
 - **Slash commands** → `.github/commands/*.md`
 - **Hooks** → `.github/hooks/*.json`
-- **MCP servers** → `.github/copilot-mcp.json` (Playwright, auto-approved)
+- **MCP servers** → `.github/mcp.json` (Playwright, `tools:["*"]`)
 
 Everything under `.github/` is **generated** from the forge's Claude-Code
 sources and carries a `# generated-from:` banner. Do not hand-edit it. After

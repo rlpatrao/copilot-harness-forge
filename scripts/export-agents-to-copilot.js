@@ -21,7 +21,7 @@
 const fs = require('fs');
 const path = require('path');
 const {
-  ROOT, OUT, parseFrontmatter, resolveAgentModel, toCopilotTools, loadWorkflows, toCopilotModel, ensureDir,
+  ROOT, OUT, parseFrontmatter, resolveAgentModel, toCopilotTools, loadWorkflows, toCopilotModel, isValidModel, ensureDir,
 } = require('./lib/copilot-export.js');
 
 function resolveBodyPlaceholders(body) {
@@ -59,14 +59,23 @@ function main() {
   }
 
   let written = 0;
+  const badModels = [];
   for (const f of files) {
     const src = fs.readFileSync(path.join(agentsDir, f), 'utf8');
+    const { attrs } = parseFrontmatter(src);
+    const resolved = resolveAgentModel(attrs.model, attrs.model_preference);
+    if (resolved.model && !isValidModel(resolved.model)) {
+      badModels.push(`${attrs.name || f}: "${resolved.model}"`);
+    }
     const { name, content } = buildAgent(src);
     const outName = `${name || path.basename(f, '.md')}.agent.md`;
     fs.writeFileSync(path.join(OUT.agents, outName), content);
     written++;
   }
-  process.stdout.write(`export-agents: ${written} agent(s) → .github/agents/*.agent.md\n`);
+  if (badModels.length) {
+    process.stderr.write(`WARN: ${badModels.length} agent(s) resolved to a model NOT in Copilot's roster — fix MODEL_MAP:\n  ${badModels.join('\n  ')}\n`);
+  }
+  process.stdout.write(`export-agents: ${written} agent(s) → .github/agents/*.agent.md${badModels.length ? ` (${badModels.length} invalid model(s) — see WARN)` : ' (all models valid)'}\n`);
 }
 
 if (require.main === module) {

@@ -1,7 +1,7 @@
 ---
 name: evaluator
 description: Skeptical verifier that runs the application and checks sprint contract criteria via API tests, Playwright interaction, browser console health monitoring, and schema validation. NOTE (BRD v3.0): the v3.0 E2E gate (`hooks/e2e-gate.js`, §3.8) is the per-feature `passes` flip enforcement. The Evaluator remains for v2.0 sprint-contract evaluation and continues to feed scores into `state/eval-scores.json` for the BRD §4.8 monotonic-improvement guard.
-model: claude-opus
+model: claude-opus-4.8
 # generated-from: agents/evaluator.md
 # model-source: literal (opus)
 ---

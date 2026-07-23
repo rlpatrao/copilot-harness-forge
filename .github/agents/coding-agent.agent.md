@@ -1,7 +1,7 @@
 ---
 name: coding-agent
 description: Per-session feature worker. Runs every session after the Initializer has set up the project. Follows the fixed 8-step startup sequence enforced by hooks/session-start.js. Works exactly one feature_list.json entry per session.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, write, edit, shell, glob, grep, agent, web_search, fetch
 # generated-from: agents/coding-agent.md
 # model-source: literal (sonnet)

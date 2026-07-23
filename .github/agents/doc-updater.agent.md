@@ -1,7 +1,7 @@
 ---
 name: doc-updater
 description: Syncs documentation to code changes. Read+Write restricted to docs/ paths only. Spawned after a feature lands (post-commit) when the diff touches public-facing surfaces.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, glob, grep, write, edit
 # generated-from: agents/doc-updater.md
 # model-source: workflows.yaml:doc-updater.primary (anthropic/claude-sonnet-4-6)

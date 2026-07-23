@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SprintContract",
+  "description": "Schema for a sprint evaluation contract",
+  "type": "object",
+  "required": ["group", "stories", "contract"],
+  "additionalProperties": false,
+  "properties": {
+    "group": {
+      "type": "string",
+      "description": "Feature group or sprint identifier"
+    },
+    "stories": {
+      "type": "array",
+      "description": "User story IDs delivered in this sprint",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "setup": {
+      "type": "array",
+      "description": "Test fixture actions to execute before running checks. Creates users, seed data, and config needed for meaningful verification.",
+      "items": {
+        "type": "object",
+        "required": ["action"],
+        "properties": {
+          "action": { "type": "string", "description": "Action type: create_user, seed_data, api_call, run_migrations, run_command" },
+          "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+          "endpoint": { "type": "string", "description": "API endpoint for api_call/seed_data actions" },
+          "path": { "type": "string", "description": "API path for api_call actions" },
+          "body": { "type": "object", "description": "Request body for API-based actions" },
+          "command": { "type": "string", "description": "Shell command for run_command actions" },
+          "email": { "type": "string" },
+          "role": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      }
+    },
+    "teardown": {
+      "type": "array",
+      "description": "Cleanup actions to execute after all checks complete. Removes test fixtures.",
+      "items": {
+        "type": "object",
+        "required": ["action"],
+        "properties": {
+          "action": { "type": "string", "description": "Action type: delete_user, api_call, run_command" },
+          "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+          "endpoint": { "type": "string" },
+          "path": { "type": "string" },
+          "body": { "type": "object" },
+          "command": { "type": "string" },
+          "email": { "type": "string" }
+        }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "description": "Verification checklist for the sprint",
+      "additionalProperties": false,
+      "properties": {
+        "api_checks": {
+          "type": "array",
+          "description": "HTTP endpoint verifications",
+          "items": {
+            "type": "object",
+            "required": ["id", "method", "path", "expected_status"],
+            "properties": {
+              "id": { "type": "string" },
+              "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+              "path": { "type": "string" },
+              "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+              "body": { "type": "object" },
+              "expected_status": { "type": "integer" },
+              "expected_body": { "type": "object" },
+              "expect": {
+                "type": "object",
+                "description": "Behavioral verification assertions beyond status code",
+                "properties": {
+                  "status": { "type": "integer", "description": "Expected HTTP status code" },
+                  "body_contains": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Strings that must appear in the response body"
+                  },
+                  "body_not_contains": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Error indicators that must NOT appear (e.g., 'Failed to connect', 'access denied')"
+                  },
+                  "min_items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "For list endpoints: minimum number of items expected in response array"
+                  },
+                  "body_schema": {
+                    "type": "string",
+                    "description": "JSON Schema $ref for response body validation"
+                  }
+                }
+              },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "playwright_checks": {
+          "type": "array",
+          "description": "Browser-level UI flow verifications",
+          "items": {
+            "type": "object",
+            "required": ["id", "description", "steps"],
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "url": { "type": "string" },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["action"],
+                  "properties": {
+                    "action": { "type": "string" },
+                    "selector": { "type": "string" },
+                    "value": { "type": "string" },
+                    "assertion": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "design_checks": {
+          "type": "object",
+          "description": "Visual/UX criteria evaluated against the scoring rubric",
+          "properties": {
+            "visual_hierarchy": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "min_score": { "type": "integer", "minimum": 1, "maximum": 10 }
+              }
+            },
+            "accessibility": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "min_score": { "type": "integer", "minimum": 1, "maximum": 10 }
+              }
+            },
+            "responsiveness": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "min_score": { "type": "integer", "minimum": 1, "maximum": 10 }
+              }
+            },
+            "interaction_feedback": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "min_score": { "type": "integer", "minimum": 1, "maximum": 10 }
+              }
+            }
+          }
+        },
+        "performance_checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "endpoint": { "type": "string" },
+              "max_response_time_ms": { "type": "number" },
+              "method": { "type": "string", "default": "GET" }
+            }
+          }
+        },
+        "architecture_checks": {
+          "type": "object",
+          "description": "Structural code quality checks",
+          "properties": {
+            "layering": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "description": { "type": "string" }
+              }
+            },
+            "typing": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "description": { "type": "string" }
+              }
+            },
+            "folder_structure": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "description": { "type": "string" }
+              }
+            },
+            "env_vars": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "description": { "type": "string" }
+              }
+            },
+            "migrations": {
+              "type": "object",
+              "properties": {
+                "required": { "type": "boolean" },
+                "description": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

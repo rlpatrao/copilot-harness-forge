@@ -1,7 +1,7 @@
 ---
 name: architect
 description: Interactive technical design partner. Conducts stack interrogation informed by BRD context, challenges weak decisions, generates machine-readable design artifacts, verifies completeness, and persists decisions for cross-project reuse.
-model: claude-opus
+model: claude-opus-4.8
 tools: read, write, glob, grep, shell, web_search, fetch
 # generated-from: agents/architect.md
 # model-source: literal (opus)

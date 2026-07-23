@@ -1,7 +1,7 @@
 ---
 name: test-engineer
 description: Creates test plans, test cases, test data, and Playwright E2E tests.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, write, edit, glob, grep, shell
 # generated-from: agents/test-engineer.md
 # model-source: literal (sonnet)

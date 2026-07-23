@@ -1,7 +1,7 @@
 ---
 name: spec-writer
 description: Decomposes BRDs into epics, stories, and dependency graphs.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, write, glob, grep, shell
 # generated-from: agents/spec-writer.md
 # model-source: literal (sonnet)

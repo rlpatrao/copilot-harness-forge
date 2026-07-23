@@ -25,22 +25,27 @@ const assert = require('assert');
 
 // ── 2. Shared helpers: model + tools mapping ─────────────────────────────────
 {
-  const { toCopilotModel, resolveAgentModel, toCopilotTools } = require('../lib/copilot-export.js');
-  assert.strictEqual(toCopilotModel('anthropic/claude-opus-4-7'), 'claude-opus');
-  assert.strictEqual(toCopilotModel('anthropic/claude-sonnet-4-6'), 'claude-sonnet');
-  assert.strictEqual(toCopilotModel('anthropic/claude-haiku-4-5'), 'claude-haiku');
-  assert.strictEqual(toCopilotModel('openai/gpt-5'), 'gpt-5');
-  assert.strictEqual(toCopilotModel('google/gemini-2.5-pro'), 'gemini-2.5-pro');
+  const { toCopilotModel, resolveAgentModel, toCopilotTools, isValidModel } = require('../lib/copilot-export.js');
+  // Real Copilot 1.0.73 roster ids (verified via `copilot help config`).
+  assert.strictEqual(toCopilotModel('anthropic/claude-opus-4-7'), 'claude-opus-4.7');
+  assert.strictEqual(toCopilotModel('anthropic/claude-sonnet-4-6'), 'claude-sonnet-4.6');
+  assert.strictEqual(toCopilotModel('anthropic/claude-haiku-4-5'), 'claude-haiku-4.5');
+  assert.strictEqual(toCopilotModel('openai/gpt-5'), 'gpt-5.5');
+  assert.strictEqual(toCopilotModel('google/gemini-2.5-pro'), 'gemini-3.1-pro-preview');
+  // every mapped id must be a real roster entry
+  for (const raw of ['anthropic/claude-opus-4-7', 'anthropic/claude-sonnet-4-6', 'anthropic/claude-haiku-4-5', 'opus', 'sonnet', 'haiku']) {
+    assert.ok(isValidModel(toCopilotModel(raw)), `${raw} → valid roster id`);
+  }
 
   // placeholder resolves via workflows.yaml
   const critic = resolveAgentModel('{{model:critic}}', null);
-  assert.strictEqual(critic.model, 'claude-opus', 'critic placeholder → claude-opus');
-  // literal short name
+  assert.strictEqual(critic.model, 'claude-opus-4.7', 'critic placeholder → claude-opus-4.7');
+  // literal short name → latest of family
   const lit = resolveAgentModel('opus', null);
-  assert.strictEqual(lit.model, 'claude-opus', 'literal opus → claude-opus');
+  assert.strictEqual(lit.model, 'claude-opus-4.8', 'literal opus → latest opus');
   // model_preference fallback
   const pref = resolveAgentModel(null, 'sonnet');
-  assert.strictEqual(pref.model, 'claude-sonnet', 'model_preference sonnet → claude-sonnet');
+  assert.strictEqual(pref.model, 'claude-sonnet-4.6', 'model_preference sonnet → claude-sonnet-4.6');
 
   assert.deepStrictEqual(
     toCopilotTools('Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch'),
@@ -81,10 +86,10 @@ const assert = require('assert');
   ].join('\n');
   const { name, content } = buildAgent(src);
   assert.strictEqual(name, 'critic');
-  assert.ok(content.includes('model: claude-opus'), 'frontmatter model resolved');
+  assert.ok(content.includes('model: claude-opus-4.7'), 'frontmatter model resolved to roster id');
   assert.ok(content.includes('tools: read, glob, grep'), 'frontmatter tools mapped');
   assert.ok(!content.includes('{{model:'), 'no unresolved placeholder leaks');
-  assert.ok(resolveBodyPlaceholders('x {{model:compactor}} y').includes('claude-haiku'), 'body placeholder resolved');
+  assert.ok(resolveBodyPlaceholders('x {{model:compactor}} y').includes('claude-haiku-4.5'), 'body placeholder resolved');
   console.log('  ✓ agent frontmatter build + placeholder resolution');
 }
 
@@ -100,13 +105,12 @@ const assert = require('assert');
   console.log('  ✓ command export');
 }
 
-// ── 6. MCP exporter ──────────────────────────────────────────────────────────
+// ── 6. MCP exporter (schema verified against Copilot 1.0.73) ─────────────────
 {
   const { toCopilotServer } = require('../export-mcp-to-copilot.js');
-  const s = toCopilotServer('playwright', { command: 'npx', args: ['-y', 'x'], purpose: 'p' });
-  assert.strictEqual(s.command, 'npx');
-  assert.deepStrictEqual(s.args, ['-y', 'x']);
-  assert.strictEqual(s.autoApprove, true, 'auto-approved for non-interactive E2E');
+  const s = toCopilotServer({ command: 'npx', args: ['-y', 'x'], purpose: 'p' });
+  assert.deepStrictEqual(s, { type: 'local', command: 'npx', args: ['-y', 'x'], tools: ['*'] },
+    'exact Copilot mcp.json server schema (type/command/args/tools, no autoApprove)');
   console.log('  ✓ MCP server translation');
 }
 

@@ -1,8 +1,5 @@
 {
-  "$generated": "scripts/export-hooks-to-copilot.js from settings.json — do not edit by hand",
-  "$schema_note": "Copilot CLI hook config. If Copilot rejects the shape, adjust key names here (matchers/hooks) per `copilot help hooks` — BRD v3.5 §7.",
-  "event": "sessionStart",
-  "matchers": [
+  "sessionStart": [
     {
       "matcher": "",
       "hooks": [

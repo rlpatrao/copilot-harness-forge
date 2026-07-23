@@ -1,7 +1,7 @@
 ---
 name: ui-designer
 description: Creates interactive React+Tailwind UI mockups as self-contained HTML files.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, write, glob, grep, shell
 # generated-from: agents/ui-designer.md
 # model-source: literal (sonnet)

@@ -1,13 +1,19 @@
 #!/usr/bin/env node
-// Export MCP server declarations → Copilot MCP config (BRD v3.5 §6e / §5e).
+// Export MCP server declarations → Copilot workspace MCP config (BRD v3.5 §6e).
 //
 //   Reads:  .claude-plugin/plugin.json  (the `mcpServers` block)
-//   Writes: .github/copilot-mcp.json
+//   Writes: .github/mcp.json
 //
-// Copilot supports MCP servers with auto-approve at server + tool level. We
-// translate our declarations to Copilot's config and default the browser MCP
-// (Playwright) to auto-approved, since the E2E gate (BRD §3.8) is non-interactive
-// and cloud-agent runs cannot answer Y/N prompts (BRD v3.5 §5).
+// Schema verified against Copilot CLI 1.0.73 during the v3.5 dogfood
+// (`copilot mcp add … --json` round-trip + `copilot mcp list` confirming the
+// workspace file loads):
+//
+//   { "mcpServers": { "<name>": { "type": "local", "command": …, "args": […],
+//                                 "tools": ["*"] } } }
+//
+// `tools: ["*"]` auto-approves every tool on the server — the forge's MCP use is
+// non-interactive verification automation (BRD §3.8 / v3.5 §5). No `autoApprove`
+// key exists in Copilot's schema; `tools:["*"]` is the mechanism.
 //
 // Idempotent. Exit 0 on success, 1 on structural error.
 
@@ -15,16 +21,9 @@ const fs = require('fs');
 const path = require('path');
 const { ROOT, OUT } = require('./lib/copilot-export.js');
 
-function toCopilotServer(name, decl) {
-  return {
-    command: decl.command,
-    args: decl.args || [],
-    // Auto-approve the whole server: the forge's MCP use is verification
-    // automation with no interactive confirmation available (BRD v3.5 §5).
-    tools: ['*'],
-    autoApprove: true,
-    _purpose: decl.purpose || undefined,
-  };
+function toCopilotServer(decl) {
+  const server = { type: 'local', command: decl.command, args: decl.args || [], tools: ['*'] };
+  return server;
 }
 
 function main() {
@@ -32,22 +31,14 @@ function main() {
   const servers = plugin.mcpServers || {};
 
   const mcpServers = {};
-  const notes = [];
   for (const [name, decl] of Object.entries(servers)) {
-    mcpServers[name] = toCopilotServer(name, decl);
-    // Preserve documented alternatives (e.g. puppeteer) as commented siblings.
-    for (const alt of decl.alternatives || []) {
-      notes.push(`alternative for ${name}: ${alt.name} (${alt.command} ${(alt.args || []).join(' ')}) — ${alt.rationale || ''}`);
-    }
+    mcpServers[name] = toCopilotServer(decl);
   }
 
-  const doc = {
-    $generated: 'scripts/export-mcp-to-copilot.js from .claude-plugin/plugin.json — do not edit by hand',
-    $notes: notes,
-    mcpServers,
-  };
-  fs.writeFileSync(OUT.mcp, JSON.stringify(doc, null, 2) + '\n');
-  process.stdout.write(`export-mcp: ${Object.keys(mcpServers).length} MCP server(s) → .github/copilot-mcp.json\n`);
+  // Copilot parses this file strictly — keep it to the exact schema, no banner
+  // keys. Provenance lives in AGENTS.md / the exporter, not the JSON.
+  fs.writeFileSync(OUT.mcp, JSON.stringify({ mcpServers }, null, 2) + '\n');
+  process.stdout.write(`export-mcp: ${Object.keys(mcpServers).length} MCP server(s) → .github/mcp.json\n`);
 }
 
 if (require.main === module) {

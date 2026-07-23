@@ -1,7 +1,7 @@
 ---
 name: ui-standards-reviewer
 description: Single-pass UI conformance checker against industry standards for SaaS, enterprise, or internal applications. No scoring, no iteration — checklist-based pass/fail with fix instructions.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, write, shell
 # generated-from: agents/ui-standards-reviewer.md
 # model-source: literal (sonnet)

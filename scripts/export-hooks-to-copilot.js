@@ -84,12 +84,12 @@ function main() {
 
   let written = 0;
   for (const [copilotEvent, matchers] of Object.entries(byEvent)) {
-    const doc = {
-      $generated: 'scripts/export-hooks-to-copilot.js from settings.json — do not edit by hand',
-      $schema_note: 'Copilot CLI hook config. If Copilot rejects the shape, adjust key names here (matchers/hooks) per `copilot help hooks` — BRD v3.5 §7.',
-      event: copilotEvent,
-      matchers,
-    };
+    // Copilot schema (per `copilot help config`): hooks are "keyed by event
+    // name (same schema as .github/hooks/*.json)". So each per-event file is an
+    // object keyed by the event name whose value is the matcher-group array —
+    // identical to a Claude Code settings.json `hooks` sub-block. No banner or
+    // `$`-prefixed keys: a strict parser could read them as bogus event names.
+    const doc = { [copilotEvent]: matchers };
     const outPath = path.join(OUT.hooks, `${copilotEvent}.json`);
     fs.writeFileSync(outPath, JSON.stringify(doc, null, 2) + '\n');
     written++;

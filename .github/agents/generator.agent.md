@@ -1,7 +1,7 @@
 ---
 name: generator
 description: Implements code and tests from user stories. Spawns agent teams for parallel execution. Negotiates sprint contracts with evaluator. NOTE (BRD v3.0): for new projects, prefer `agents/coding-agent.md` — the v3.0 per-session feature worker driven by `feature_list.json`. The Generator remains for the v2.0 sprint-contract flow and as the GAN-pair generator under `agents/critic.md` review (BRD §3.6).
-model: claude-sonnet
+model: claude-sonnet-4.6
 # generated-from: agents/generator.md
 # model-source: literal (sonnet)
 ---

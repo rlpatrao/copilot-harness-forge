@@ -1,7 +1,7 @@
 ---
 name: codebase-explorer
 description: Read-only exploration agent. Grounds every "where is X" / "who calls Y" query in file:line citations from the living code-graph. Never edits code. Use before any refactor, seam-finding, or spec-audit that needs cross-file understanding.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, glob, grep, shell
 # generated-from: agents/codebase-explorer.md
 # model-source: literal (sonnet)

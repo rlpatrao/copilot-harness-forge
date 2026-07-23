@@ -1,7 +1,7 @@
 ---
 name: critic
 description: Independent quality judgment in the GAN pair (BRD §5.1). Read-only. Stronger model than the Generator. Catches issues by reading the diff without re-deriving the spec. Distinct from agents/code-reviewer.md which performs PR-style review.
-model: claude-opus
+model: claude-opus-4.7
 tools: read, glob, grep
 # generated-from: agents/critic.md
 # model-source: workflows.yaml:critic.primary (anthropic/claude-opus-4-7)

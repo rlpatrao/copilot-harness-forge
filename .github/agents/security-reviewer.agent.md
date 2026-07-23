@@ -1,7 +1,7 @@
 ---
 name: security-reviewer
 description: Scans for OWASP Web Top 10 + OWASP Agentic Top 10 (ASI01-ASI10) vulnerabilities. Covers injection, auth bypass, secrets, SSRF, path traversal, plus agent-specific risks: goal hijack, tool misuse, excessive agency, memory poisoning, cascading hallucination, data exfiltration.
-model: claude-sonnet
+model: claude-sonnet-4.6
 # generated-from: agents/security-reviewer.md
 # model-source: literal (sonnet)
 ---

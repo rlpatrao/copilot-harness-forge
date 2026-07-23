@@ -1,7 +1,7 @@
 ---
 name: e2e-runner
 description: Executes a feature_list.json entry's steps[] against the running app via Playwright or Puppeteer MCP. Captures the verification artifact required by the BRD §3.8 E2E gate. Read+browser-MCP only.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, glob, grep, mcp__playwright__*, mcp__puppeteer__*
 # generated-from: agents/e2e-runner.md
 # model-source: workflows.yaml:e2e-runner.primary (anthropic/claude-sonnet-4-6)

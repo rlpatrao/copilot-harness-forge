@@ -1,7 +1,7 @@
 ---
 name: planner
 description: Read-only subagent spawned by /plan. Produces a structured plan file in scratch/plans/ without ever writing or editing implementation files. Schema-level restriction (no Write/Edit/Bash-mutate tools) makes "stuck in plan mode" structurally impossible.
-model: claude-opus
+model: claude-opus-4.7
 tools: read, glob, grep, fetch, web_search
 # generated-from: agents/planner.md
 # model-source: workflows.yaml:planner.primary (anthropic/claude-opus-4-7)

@@ -1,7 +1,7 @@
 ---
 name: brd-creator
 description: Collaborates with the human to create Business Requirements Documents through Socratic dialogue with 5-dimension exploration, alternatives analysis, and engineer self-audit.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, write, glob, grep, shell, web_search, fetch
 # generated-from: agents/brd-creator.md
 # model-source: literal (sonnet)

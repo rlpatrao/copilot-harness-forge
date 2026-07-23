@@ -1,7 +1,7 @@
 ---
 name: compliance-reviewer
 description: Reviews AI/ML solutions for bias, fairness, data privacy, regulatory compliance, and responsible AI practices. Checks model fairness metrics, PII handling, data retention policies, and generates model cards.
-model: claude-sonnet
+model: claude-sonnet-4.6
 # generated-from: agents/compliance-reviewer.md
 # model-source: literal (sonnet)
 ---

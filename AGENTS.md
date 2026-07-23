@@ -51,7 +51,13 @@ This produces:
 | `.github/hooks/*.json` | `settings.json` `hooks` block | `export-hooks-to-copilot.js` |
 | `.github/agents/*.agent.md` | `agents/*.md` (+ `config/workflows.yaml` model routing) | `export-agents-to-copilot.js` |
 | `.github/commands/*.md` | `commands/*.md` | `export-commands-to-copilot.js` |
-| `.github/copilot-mcp.json` | `.claude-plugin/plugin.json` `mcpServers` | `export-mcp-to-copilot.js` |
+| `.github/skills/*/SKILL.md` | `skills/*/` (mirrored) | `export-skills-to-copilot.js` |
+| `.github/mcp.json` | `.claude-plugin/plugin.json` `mcpServers` | `export-mcp-to-copilot.js` |
+
+Paths and schemas were verified against **Copilot CLI 1.0.73** during the v3.5
+dogfood (`copilot mcp list` and `copilot skill list` load the workspace tree;
+see [`brd/v3.5-copilot-dogfood-runbook.md`](brd/v3.5-copilot-dogfood-runbook.md)
+§ Dogfood findings).
 
 Do not hand-edit files under `.github/` — they carry a `# generated-from:` banner
 and are overwritten on the next export. Edit the forge source and re-run.
@@ -75,12 +81,13 @@ COPILOT=1 AUTO_ADVANCE_ON_ARCHITECTURE_APPROVED=1 copilot --print /auto
 
 Copilot runs models through its own inference — you cannot bring your own key, so
 `config/workflows.yaml`'s per-workflow provider/failover routing does not apply
-at runtime. The agent exporter reads `workflows.yaml` and bakes a **static**
-Copilot model family (`claude-opus` / `claude-sonnet` / `claude-haiku` / `gpt-5`
-/ `gemini-2.5-pro`) into each `.agent.md`'s `model:` field. `workflows.yaml`
-remains the human-readable per-workflow spec and the source of truth the exporter
-resolves from. To change a model family map, edit `MODEL_MAP` in
-[`scripts/lib/copilot-export.js`](scripts/lib/copilot-export.js).
+at runtime. The agent exporter reads `workflows.yaml` and bakes a **static**,
+**real Copilot roster** model id (e.g. `claude-opus-4.7`, `claude-sonnet-4.6`,
+`claude-haiku-4.5`) into each `.agent.md`'s `model:` field. Every resolved id is
+validated against Copilot 1.0.73's roster at export time; an unknown id prints a
+`WARN`. `workflows.yaml` remains the human-readable per-workflow spec and the
+source of truth the exporter resolves from. To adjust the map, edit `MODEL_MAP` /
+`VALID_MODELS` in [`scripts/lib/copilot-export.js`](scripts/lib/copilot-export.js).
 
 ### Cloud coding agent (optional)
 

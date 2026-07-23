@@ -20,6 +20,7 @@ const steps = [
   'export-hooks-to-copilot.js',
   'export-agents-to-copilot.js',
   'export-commands-to-copilot.js',
+  'export-skills-to-copilot.js',
   'export-mcp-to-copilot.js',
 ];
 

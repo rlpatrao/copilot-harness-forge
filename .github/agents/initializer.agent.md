@@ -1,7 +1,7 @@
 ---
 name: initializer
 description: Runs exactly once at project genesis. Expands the user prompt into a comprehensive feature_list.json contract, writes init.sh, initializes git, creates harness-progress.txt and CLAUDE.md, discovers MCP servers. Never returns mid-project.
-model: claude-opus
+model: claude-opus-4.8
 tools: read, write, edit, shell, glob, grep, web_search, fetch
 # generated-from: agents/initializer.md
 # model-source: literal (opus)

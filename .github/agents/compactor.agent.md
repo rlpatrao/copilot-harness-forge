@@ -1,7 +1,7 @@
 ---
 name: compactor
 description: Summarizes session transcripts for BRD §4.3 compaction stages 3-5. Uses Haiku for cost. Read+summarize only. Spawned by hooks/compaction-stage.js when budget thresholds are crossed.
-model: claude-haiku
+model: claude-haiku-4.5
 tools: read, glob, grep
 # generated-from: agents/compactor.md
 # model-source: workflows.yaml:compactor.primary (anthropic/claude-haiku-4-5)

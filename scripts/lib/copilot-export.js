@@ -53,16 +53,36 @@ function loadWorkflows() {
   return _workflows;
 }
 
-// Provider/model string → Copilot family slug. Edit this table if Copilot's
-// public model identifiers change (BRD v3.5 §7 expected first-run issue).
+// The actual Copilot CLI 1.0.73 model roster (from `copilot help config`).
+// Used to validate every resolved slug so a bad mapping is caught at export
+// time, not at Copilot runtime. Update when `copilot help config` changes.
+const VALID_MODELS = new Set([
+  'claude-sonnet-5', 'claude-sonnet-4.6', 'claude-sonnet-4.5', 'claude-haiku-4.5',
+  'claude-fable-5', 'claude-opus-4.8', 'claude-opus-4.8-fast', 'claude-opus-4.7',
+  'claude-opus-4.6', 'claude-opus-4.5', 'gpt-5.6-sol', 'gpt-5.6-terra',
+  'gpt-5.6-luna', 'gpt-5.5', 'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.4-mini',
+  'gpt-5-mini', 'gemini-3.1-pro-preview', 'gemini-3.5-flash', 'kimi-k2.7-code',
+]);
+
+// Provider/model string → a REAL Copilot model id (verified against the roster
+// above during the v3.5 dogfood). Versioned Anthropic ids convert dash→dot
+// (claude-opus-4-7 → claude-opus-4.7, all three families are in the roster);
+// bare family literals map to a sensible current default. Edit if the roster
+// shifts (BRD v3.5 §7).
 const MODEL_MAP = [
-  [/opus/i, 'claude-opus'],
-  [/sonnet/i, 'claude-sonnet'],
-  [/haiku/i, 'claude-haiku'],
+  [/claude-opus-4-7/i, 'claude-opus-4.7'],
+  [/claude-opus-4-6/i, 'claude-opus-4.6'],
+  [/claude-opus-4-5/i, 'claude-opus-4.5'],
+  [/opus/i, 'claude-opus-4.8'],                 // bare "opus" → latest opus
+  [/claude-sonnet-4-6/i, 'claude-sonnet-4.6'],
+  [/claude-sonnet-4-5/i, 'claude-sonnet-4.5'],
+  [/sonnet/i, 'claude-sonnet-4.6'],             // bare "sonnet"
+  [/haiku/i, 'claude-haiku-4.5'],
+  [/kimi/i, 'kimi-k2.7-code'],
   [/gpt-5-mini/i, 'gpt-5-mini'],
-  [/gpt-5/i, 'gpt-5'],
-  [/gemini.*flash/i, 'gemini-2.5-flash'],
-  [/gemini/i, 'gemini-2.5-pro'],
+  [/gpt-5/i, 'gpt-5.5'],                          // no bare gpt-5 in roster → 5.5
+  [/gemini.*flash/i, 'gemini-3.5-flash'],
+  [/gemini/i, 'gemini-3.1-pro-preview'],
 ];
 
 function toCopilotModel(raw) {
@@ -70,6 +90,11 @@ function toCopilotModel(raw) {
   for (const [re, slug] of MODEL_MAP) if (re.test(raw)) return slug;
   // Unknown — strip any provider/ prefix and pass through so it's visible.
   return raw.includes('/') ? raw.split('/').pop() : raw;
+}
+
+// True when a slug is a real Copilot model id (for export-time validation).
+function isValidModel(slug) {
+  return VALID_MODELS.has(slug);
 }
 
 // Resolve an agent's model: field to a Copilot slug. Handles both the
@@ -125,7 +150,10 @@ const OUT = {
   hooks: path.join(ROOT, '.github', 'hooks'),
   agents: path.join(ROOT, '.github', 'agents'),
   commands: path.join(ROOT, '.github', 'commands'),
-  mcp: path.join(ROOT, '.github', 'copilot-mcp.json'),
+  skills: path.join(ROOT, '.github', 'skills'),
+  // Copilot CLI 1.0.73 reads workspace MCP config from .github/mcp.json (or
+  // .mcp.json) — verified during the v3.5 dogfood (`copilot mcp list`).
+  mcp: path.join(ROOT, '.github', 'mcp.json'),
 };
 
 function ensureDir(dir) { fs.mkdirSync(dir, { recursive: true }); }
@@ -136,7 +164,7 @@ function banner(sourceRel) {
 }
 
 module.exports = {
-  ROOT, OUT, EVENT_MAP, TOOL_MAP, MODEL_MAP,
-  parseFrontmatter, toCopilotModel, resolveAgentModel, toCopilotTools,
+  ROOT, OUT, EVENT_MAP, TOOL_MAP, MODEL_MAP, VALID_MODELS,
+  parseFrontmatter, toCopilotModel, isValidModel, resolveAgentModel, toCopilotTools,
   loadWorkflows, ensureDir, banner,
 };

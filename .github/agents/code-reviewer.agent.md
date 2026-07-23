@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Reviews code for quality, architecture compliance, test coverage, and story traceability.
-model: claude-sonnet
+model: claude-sonnet-4.6
 tools: read, write, edit, grep, glob, shell
 # generated-from: agents/code-reviewer.md
 # model-source: literal (sonnet)
