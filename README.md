@@ -1,37 +1,59 @@
-# Claude Harness Forge
+# Harness Forge
 
-> A Claude Code plugin that builds software the way a well-run engineering team would — from requirements to production, with independent verification at every step and rules that acquire themselves from what the system rejects.
+> A harness that builds software the way a well-run engineering team would — from requirements to production, with independent verification at every step and rules that acquire themselves from what the system rejects. **Runs on both Claude Code and GitHub Copilot CLI.**
 
-> **v3.4** (July 2026) is the current line. Full spec chain: [`brd/v3.0.md`](brd/v3.0.md) → [`brd/v3.1-implementation-plan.md`](brd/v3.1-implementation-plan.md) → [`brd/v3.2-implementation-plan.md`](brd/v3.2-implementation-plan.md) → [`brd/v3.3-trace-compiled-rules-plan.md`](brd/v3.3-trace-compiled-rules-plan.md) → [`brd/v3.4-headless-dogfood.md`](brd/v3.4-headless-dogfood.md). Machine-readable inventory: [`HARNESS.md`](HARNESS.md) + [`harness-manifest.json`](harness-manifest.json) (91 components). Live punch list: [`feature_list.json`](feature_list.json) (81 entries).
+> **v3.5** (July 2026) is the current line — the **GitHub Copilot CLI port**. The same agents, skills, hooks, and commands run under both runtimes: Claude Code loads the forge as a plugin; Copilot CLI loads a generated `.github/` install tree. Port design: [`brd/v3.5-copilot-port-analysis.md`](brd/v3.5-copilot-port-analysis.md); live-verified runbook + findings: [`brd/v3.5-copilot-dogfood-runbook.md`](brd/v3.5-copilot-dogfood-runbook.md). Full spec chain: [`brd/v3.0.md`](brd/v3.0.md) → [`v3.1`](brd/v3.1-implementation-plan.md) → [`v3.2`](brd/v3.2-implementation-plan.md) → [`v3.3`](brd/v3.3-trace-compiled-rules-plan.md) → [`v3.4`](brd/v3.4-headless-dogfood.md) → **v3.5 (Copilot)**. Machine-readable inventory: [`HARNESS.md`](HARNESS.md) + [`harness-manifest.json`](harness-manifest.json). Live punch list: [`feature_list.json`](feature_list.json) (82 entries).
 
-> **Counts as of v3.4:** 20 agents · 36 hooks · 53 skills · 27 commands · 35 scripts · 91 harness-manifest rows · 81 feature_list entries.
+> **Counts as of v3.5:** 20 agents · 36 hooks · 53 skills · 28 commands · 46 scripts · 82 feature_list entries. Each is exported 1:1 into the Copilot install tree under `.github/` (`agents/`, `skills/`, `commands/`, `hooks/`, `mcp.json`).
+
+> **Which runtime?** Claude Code gives you BYO-LLM routing (`config/workflows.yaml`), tree-structured sessions, and the plugin install. GitHub Copilot CLI gives you pooled Copilot Business/Pro billing and a `.github/`-native install, at the cost of BYO-LLM (models run through Copilot's inference). Both drive the same 12-gate ratchet and `feature_list.json` contract. See [Running under GitHub Copilot CLI](#running-under-github-copilot-cli).
 
 You describe what you want to build. The forge runs specialized agents through the pipeline: gathering requirements through Socratic interview (or importing your existing BRD + architecture doc), challenging your architecture decisions, decomposing work into stories, generating code with parallel agent teams, and verifying everything by actually running the application. Not by reading the code and saying "looks good."
 
 One command starts it. Human approval gates the creative decisions (BRD, architecture, design). Everything after that — implementation, testing, verification, self-healing, rule acquisition — runs autonomously, bounded by the [`feature_list.json`](feature_list.json) contract.
 
+### On Claude Code
+
 Two ways to start — pick one based on whether you already have a BRD and architecture doc.
 
 ```bash
 # INTERACTIVE — the forge interviews you
-git clone https://github.com/rlpatrao/claude_harness_forge.git ~/claude-harness-forge
+git clone https://github.com/rlpatrao/claude_harness_forge.git ~/harness-forge
 mkdir my-app && cd my-app
-claude --plugin-dir ~/claude-harness-forge
+claude --plugin-dir ~/harness-forge
 > /scaffold
 ```
 
 ```bash
 # HEADLESS — bring your own BRD + Architecture
-git clone https://github.com/rlpatrao/claude_harness_forge.git ~/claude-harness-forge
+git clone https://github.com/rlpatrao/claude_harness_forge.git ~/harness-forge
 mkdir my-app && cd my-app
 cp /path/to/your/BRD.md ./BRD.md                      # or requirements.md / prd.md
 cp /path/to/your/architecture.md ./architecture.md    # or .dsl / .puml / .mmd (AAC)
-claude --plugin-dir ~/claude-harness-forge
+claude --plugin-dir ~/harness-forge
 > /scaffold --branch B --brd BRD.md --arch architecture.md \
             --name my-app --type saas --plugins minimal --yes
 ```
 
 The headless invocation skips every interactive question — Q0 (source), Q1-Q3 (project info), the 11-round architect interrogation (replaced by synthesis over your imported architecture), and the architect review loop (auto-approved). It ends with `state/architecture-approved.flag` written and the project ready for `/auto`.
+
+### On GitHub Copilot CLI (v3.5)
+
+```bash
+# 1. Install the agentic Copilot CLI (needs Node 22+ and a Copilot seat)
+npm install -g @github/copilot
+
+# 2. Get the forge and generate the Copilot install tree
+git clone https://github.com/rlpatrao/claude_harness_forge.git ~/harness-forge
+cd ~/harness-forge
+node scripts/export-to-copilot.js          # writes .github/{agents,skills,commands,hooks}/ + mcp.json
+
+# 3. Trust the folder so hooks can run (one-time), then start
+copilot                                    # accept the folder-trust prompt
+> say hi                                   # SessionStart context loads; /auto to build
+```
+
+Everything under `.github/` is **generated** from the forge's Claude-Code sources by the exporters — re-run `node scripts/export-to-copilot.js` after editing any agent/skill/command/hook and commit the tree. Full setup, the `COPILOT=1` behavior switch, folder-trust, model routing, and known limits are in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli) and [`AGENTS.md`](AGENTS.md).
 
 ---
 
@@ -243,7 +265,77 @@ coding-agent:
   # LiteLLM translates OpenAI tool-call ↔ Anthropic tool_use
 ```
 
+**GitHub Copilot CLI as runtime**: **supported (v3.5)** — see the section below. Copilot has no BYOK, so `workflows.yaml` routing is baked into each exported agent as a static Copilot model id instead of driving runtime provider selection.
+
 **Codex CLI as runtime replacement**: not supported without porting (~2-4 weeks — different hook event model, different subagent tool). Skills, MCP servers, feature_list.json, and fixtures all port cleanly.
+
+---
+
+## Running under GitHub Copilot CLI
+
+v3.5 ports the forge to **GitHub Copilot CLI** (`@github/copilot`, verified against 1.0.73). It's a *translation layer*, not a fork — the same hook logic, agents, skills, and commands run under both runtimes. Claude Code loads the forge as a plugin; Copilot loads a generated `.github/` install tree.
+
+### Install & generate
+
+```bash
+npm install -g @github/copilot        # Node 22+, an active Copilot seat
+node scripts/export-to-copilot.js     # regenerate the .github/ tree from forge sources
+git add .github/ && git commit -m "chore: regenerate Copilot export tree"
+```
+
+The exporters (all under `scripts/`) map forge sources → the paths Copilot actually reads:
+
+| Generated | From | Exporter |
+|---|---|---|
+| `.github/hooks/*.json` + `hooks/run/*.sh` | `settings.json` hooks | `export-hooks-to-copilot.js` |
+| `.github/agents/*.agent.md` | `agents/*.md` (+ `workflows.yaml` model) | `export-agents-to-copilot.js` |
+| `.github/skills/*/SKILL.md` | `skills/*/` | `export-skills-to-copilot.js` |
+| `.github/commands/*.md` | `commands/*.md` | `export-commands-to-copilot.js` |
+| `.github/mcp.json` | `.claude-plugin/plugin.json` | `export-mcp-to-copilot.js` |
+
+Files under `.github/` carry a `# generated-from:` banner — **don't hand-edit them**; edit the forge source and re-run the exporter.
+
+### Two things that differ from Claude Code
+
+1. **`COPILOT=1` output switch.** Claude Code wraps injected context in `hookSpecificOutput`; Copilot expects a flat object. [`hooks/lib/output.js`](hooks/lib/output.js) emits both — the generated hook wrappers set `COPILOT=1` themselves, so no manual step. Claude Code behavior is byte-identical when the var is unset.
+2. **Folder trust is required for hooks.** Copilot only runs repo hooks in a trusted folder. Accept the trust prompt on first interactive run, or seed `~/.copilot/settings.json` → `trustedFolders: ["<repo abs path>"]`. Without trust, hooks silently don't fire.
+
+### Verified working (live, Copilot CLI 1.0.73)
+
+| Component | Evidence |
+|---|---|
+| **Hooks fire** | one session drove `state/fire-log.jsonl` 53 → 418 across **35 hooks** (SessionStart 1×, Stop-hooks 1×, tool hooks per call) |
+| **MCP** | `copilot mcp list` → `playwright (local)` from `.github/mcp.json` |
+| **Skills** | `copilot skill list` → 53 project skills |
+| **Instructions** | `CLAUDE.md` / [`AGENTS.md`](AGENTS.md) / [`.github/copilot-instructions.md`](.github/copilot-instructions.md) load as custom instructions |
+| **Models** | every agent resolves to a real Copilot roster id (validated at export) |
+
+### Model routing (no BYOK)
+
+Copilot runs models through its own inference — you can't bring your own key. The agent exporter reads `config/workflows.yaml` and bakes a **static** Copilot model id into each `.agent.md` (`anthropic/claude-opus-4-7` → `claude-opus-4.7`, etc.), validated against Copilot's roster at export time. `workflows.yaml` stays the human-readable per-workflow spec.
+
+### SessionStart lean mode
+
+Under `COPILOT=1` (and not headless `/auto`), `session-start.js` emits a lean ~250-token status payload and **defers** the full "read everything + start working" startup to an explicit `/auto` — so a casual Copilot session doesn't balloon context or start unprompted work. Claude Code and headless `/auto` keep the full startup.
+
+### Known limits (tracked in the runbook)
+
+- **No hook matcher** in Copilot's schema → every hook fires on every tool call (hooks self-filter). Restoring Edit/Write/Bash gating is an open item.
+- **Skill-catalog cost** — the 53 skill bodies are ~111k tokens; trimming the exported set for Copilot is a future lever.
+- **Agent discovery** (`copilot --agent <name>`, `.agent.md` vs `.md`) not yet exercised end-to-end.
+- **Custom slash commands** aren't auto-discovered by 1.0.73; `.github/commands/` is exported for parity but Copilot surfaces the forge via skills/agents/instructions.
+- **Cloud coding agent** (autonomous PRs via GitHub Actions) is deferred to v3.5.7.
+
+### Entitlement
+
+Copilot resolves your seat from your GitHub account. If you're in an org with Copilot Business but no assigned seat, CLI access is denied by org policy — use a **personal** Copilot subscription (Pro/Pro+) or have an org admin assign a seat + enable the CLI/MCP policies. A fine-grained PAT with the "Copilot Requests" permission (`COPILOT_GITHUB_TOKEN`) pins the CLI to a specific account for headless use.
+
+### Verify a run
+
+```bash
+node scripts/copilot-parity-check.js state/fire-log.jsonl                 # coverage of which hooks fired
+node scripts/copilot-parity-check.js state/fire-log.jsonl --baseline claude.jsonl   # parity vs a Claude baseline
+```
 
 ---
 
@@ -421,8 +513,8 @@ The scaffold offers 25+ Claude Code plugins organized by compatibility:
 
 ## Requirements
 
-- **Claude Code** v2.1.32+ (agent teams support) — or Codex CLI with adaptation
-- **Node.js 18+** (for 36 hooks and orchestration scripts)
+- **A supported runtime** — either **Claude Code** v2.1.32+ (agent teams support), or **GitHub Copilot CLI** (`@github/copilot`, verified on 1.0.73) with a Copilot seat. Codex CLI needs porting (~2-4 weeks).
+- **Node.js 18+** for Claude Code (**22+** for the Copilot CLI) — runs the 36 hooks and orchestration scripts
 - **Docker + Docker Compose** (for evaluation, optional if using local verification)
 - **Python 3.12+** and/or **Node.js 20+** (for generated projects)
 - **Playwright MCP** OR **Puppeteer MCP** (declared in `.claude-plugin/plugin.json` — required for E2E gate)
@@ -435,35 +527,43 @@ The scaffold offers 25+ Claude Code plugins organized by compatibility:
 ## Repo Structure
 
 ```
-claude_harness_forge/
-  agents/                     20 agent definitions
+harness-forge/
+  agents/                     20 agent definitions          (Claude Code source)
   skills/                     53 skills (executable + reference libraries)
   hooks/                      36 enforcement hooks
-    lib/                        shared helpers (log-rejection.js, etc.)
-  commands/                   27 slash commands
-  scripts/                    35 orchestration scripts (validate, compile, generate)
+    lib/                        shared helpers (output.js dual-shape emitter, log-rejection.js, …)
+  commands/                   28 slash commands
+  scripts/                    46 orchestration scripts (validate, compile, generate)
+    export-*-to-copilot.js      v3.5 Copilot exporters (hooks/agents/commands/skills/mcp)
+    export-to-copilot.js        orchestrator — regenerates the whole .github/ tree
+    copilot-parity-check.js     v3.5 fire-log parity checker
+    lib/copilot-export.js       shared exporter helpers (model map, tool map, paths)
+  .github/                    v3.5 GENERATED Copilot install tree (do not hand-edit)
+    agents/  skills/  commands/  hooks/{*.json,run/*.sh}  mcp.json
+    copilot-instructions.md     Copilot-native instructions (points to AGENTS.md → CLAUDE.md)
+  AGENTS.md                   Copilot/agent runtime layer over CLAUDE.md
+  CLAUDE.md                   full forge contract (source of truth, both runtimes)
   evals/                      code reviewer regression tests
   templates/                  17 project templates
     dogfood-fixtures/           v3.4 fixtures (salary-dashboard, etc.)
     git-hooks/                  real git hooks installed by scaffold
     github-workflows/           CI templates (scheduled-triage etc.)
-  brd/                        BRD v3.0-v3.4 specs and plans
+  brd/                        BRD v3.0-v3.5 specs, plans, and the Copilot dogfood runbook
   docs/                       operational docs (sensor-arbitration, token-governor, etc.)
   learnings/                  cross-project knowledge base
   state/                      initial state files
     compiled-rules.json         v3.3 TRACE machine rules
     learned-rules.md            v3.2.1 human fast-lane rules
     memory/                     v3.1.11 three-tier filesystem memory
-    context-cache/              v3.1.6 CCR pipeline outputs (gitignored)
   config/
-    workflows.yaml              per-workflow LLM routing
+    workflows.yaml              per-workflow LLM routing (Claude Code runtime; static export for Copilot)
   recipes/                    YAML deterministic workflows
   instincts/                  v3.0 3-tier promotion (pending/tentative/confirmed)
   verification/               E2E gate artifacts + attestations
   HARNESS.md                  human-readable component registry
-  harness-manifest.json       machine-readable component registry (91 components)
-  feature_list.json           81-entry append-only project contract
-  harness-progress.txt        cross-session bridge (all v3.0-v3.4 milestones logged)
+  harness-manifest.json       machine-readable component registry
+  feature_list.json           82-entry append-only project contract
+  harness-progress.txt        cross-session bridge (all v3.0-v3.5 milestones logged)
 ```
 
 ---
@@ -487,6 +587,7 @@ claude_harness_forge/
 
 ## Release History
 
+- **v3.5** (July 2026) — **GitHub Copilot CLI port.** Dual-runtime hook output adapter (`hooks/lib/output.js`, `COPILOT=1` → flat shape, Claude Code byte-identical otherwise); five exporters + orchestrator (`scripts/export-*-to-copilot.js`) that generate the `.github/{agents,skills,commands,hooks}/` + `mcp.json` install tree from forge sources; static per-agent model resolution from `workflows.yaml` validated against Copilot's roster; `AGENTS.md` + `.github/copilot-instructions.md`; `scripts/copilot-parity-check.js`. **Live-verified against Copilot CLI 1.0.73** — hooks fire (fire-log 53→418 across 35 hooks), MCP + 53 skills load, custom instructions load; corrected the real hook schema (`{version,hooks:{…}}` + `bash` wrappers) and the folder-trust requirement; added Copilot SessionStart lean mode. Design + findings: [`brd/v3.5-copilot-port-analysis.md`](brd/v3.5-copilot-port-analysis.md), [`brd/v3.5-copilot-dogfood-runbook.md`](brd/v3.5-copilot-dogfood-runbook.md).
 - **v3.4** (July 2026) — Headless scaffold + dogfood setup. `--branch`/`--brd`/`--arch`/`--name`/`--type`/`--plugins`/`--yes` scaffold flags; `--auto-approve` on architect (synthesis mode only); `AUTO_ADVANCE_ON_ARCHITECTURE_APPROVED` env var upgrades SessionStart to imperative; `scripts/dogfood-setup.sh` + `templates/dogfood-fixtures/salary-dashboard/` (5-dim BRD + Structurizr DSL). 5 feature entries. 36/36 smoke checks passed. Spec: [`brd/v3.4-headless-dogfood.md`](brd/v3.4-headless-dogfood.md).
 - **v3.3** (July 2026) — TRACE compiled-rule enforcement. `hooks/rule-gate.js` PreToolUse pattern-block; `hooks/correction-detector.js` Stop-event candidate miner; `hooks/lib/log-rejection.js` shared producer wired into e2e-gate, feature-edit-guard, critic, security-reviewer, code-reviewer; `scripts/rule-compile.js` + `/rules` curation with candidate→tentative(warn)→confirmed(block) lifecycle; semantic-path via `agents/critic.md`; `skills/compiled-rules/SKILL.md`. 6 feature entries. 26/26 dogfood checks passed. Spec: [`brd/v3.3-trace-compiled-rules-plan.md`](brd/v3.3-trace-compiled-rules-plan.md).
 - **v3.2** (June-July 2026) — Five external-harness borrows: learned-rules propagation (v3.2.1 with security hardening — symlink guard + prompt-injection framing); 3-instance majority vote at merge boundary (v3.2.2); sensor arbitration taxonomy + waiver schema (v3.2.3); cross-feature regression sensor (v3.2.4); Khononov Balanced Coupling rubric (v3.2.5). 5 feature entries. Spec: [`brd/v3.2-implementation-plan.md`](brd/v3.2-implementation-plan.md).
