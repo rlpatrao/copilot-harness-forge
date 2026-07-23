@@ -1,122 +1,139 @@
 {
-  "postToolUse": [
-    {
-      "matcher": "Edit|Write",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/scope-directory.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/protect-env.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/detect-secrets.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/lint-on-save.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/typecheck.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/check-architecture.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/check-function-length.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/check-file-length.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/prompt-injection-detect.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/pii-scan.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/verify-on-save.js"
-        }
-      ]
-    },
-    {
-      "matcher": "Write",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/protect-pdfs.js"
-        }
-      ]
-    },
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/pre-commit-gate.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/sprint-contract-gate.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/teammate-idle-check.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/network-egress.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/experiment-logger.js"
-        }
-      ]
-    },
-    {
-      "matcher": "Agent",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/cost-tracker.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/token-budget.js"
-        }
-      ]
-    },
-    {
-      "matcher": "",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/budget-footer.js"
-        }
-      ]
-    },
-    {
-      "matcher": "todo|TodoWrite|task",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/task-completed.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/findings-collector.js"
-        }
-      ]
-    }
-  ]
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "./run/scope-directory.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/protect-env.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/detect-secrets.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/lint-on-save.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/typecheck.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/check-architecture.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/check-function-length.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/check-file-length.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/prompt-injection-detect.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/pii-scan.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/verify-on-save.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/protect-pdfs.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/pre-commit-gate.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/sprint-contract-gate.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/teammate-idle-check.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/network-egress.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/experiment-logger.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/cost-tracker.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/token-budget.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/budget-footer.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/task-completed.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/findings-collector.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      }
+    ]
+  }
 }

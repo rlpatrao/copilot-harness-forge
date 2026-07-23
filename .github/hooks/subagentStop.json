@@ -1,13 +1,13 @@
 {
-  "subagentStop": [
-    {
-      "matcher": "",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/concurrency-gate.js"
-        }
-      ]
-    }
-  ]
+  "version": 1,
+  "hooks": {
+    "subagentStop": [
+      {
+        "type": "command",
+        "bash": "./run/concurrency-gate.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      }
+    ]
+  }
 }

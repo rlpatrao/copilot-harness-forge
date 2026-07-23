@@ -1,13 +1,13 @@
 {
-  "preCompact": [
-    {
-      "matcher": "",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/compaction-stage.js"
-        }
-      ]
-    }
-  ]
+  "version": 1,
+  "hooks": {
+    "preCompact": [
+      {
+        "type": "command",
+        "bash": "./run/compaction-stage.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      }
+    ]
+  }
 }

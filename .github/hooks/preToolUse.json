@@ -1,76 +1,55 @@
 {
-  "preToolUse": [
-    {
-      "matcher": "Edit|Write",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/dangerous-patterns.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/reminder-injector.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/e2e-gate.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/feature-edit-guard.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/rule-gate.js"
-        }
-      ]
-    },
-    {
-      "matcher": "Read|Glob|Grep",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/token-advisor.js"
-        }
-      ]
-    },
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/dangerous-patterns.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/reminder-injector.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/pre-bash-gate.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/token-advisor.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/rule-gate.js"
-        }
-      ]
-    },
-    {
-      "matcher": "Agent|Task",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/reminder-injector.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/concurrency-gate.js"
-        }
-      ]
-    }
-  ]
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "./run/dangerous-patterns.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/reminder-injector.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/e2e-gate.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/feature-edit-guard.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/rule-gate.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/token-advisor.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/pre-bash-gate.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/concurrency-gate.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      }
+    ]
+  }
 }

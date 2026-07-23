@@ -1,25 +1,31 @@
 {
-  "agentStop": [
-    {
-      "matcher": "",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/ralph-loop.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/instinct-extractor.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/correction-detector.js"
-        },
-        {
-          "type": "command",
-          "command": "COPILOT=1 node hooks/graph-refresh.js"
-        }
-      ]
-    }
-  ]
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "./run/ralph-loop.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/instinct-extractor.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/correction-detector.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./run/graph-refresh.sh",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      }
+    ]
+  }
 }

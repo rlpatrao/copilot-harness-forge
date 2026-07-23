@@ -56,19 +56,20 @@ const assert = require('assert');
   console.log('  ✓ model + tool mapping');
 }
 
-// ── 3. Hook exporter: command rewrite + TaskCompleted fold-in ────────────────
+// ── 3. Hook exporter: name extraction, matcher-group union, bash wrapper ─────
 {
-  const { rewriteCommand, hookScriptName, convertMatcherGroup } = require('../export-hooks-to-copilot.js');
-  assert.strictEqual(
-    rewriteCommand('node "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.js"'),
-    'COPILOT=1 node hooks/session-start.js',
-    'command rewritten with COPILOT=1 + relative path'
-  );
-  assert.strictEqual(hookScriptName('node x/y/ralph-loop.js'), 'ralph-loop.js');
-  const grp = convertMatcherGroup({ matcher: 'Edit|Write', hooks: [{ command: 'node a/foo.js' }, { command: 'echo no-js' }] });
-  assert.strictEqual(grp.hooks.length, 1, 'non-.js command dropped');
-  assert.strictEqual(grp.hooks[0].command, 'COPILOT=1 node hooks/foo.js');
-  console.log('  ✓ hook command rewrite + matcher conversion');
+  const { hookScriptName, collectHookNames, wrapperScript } = require('../export-hooks-to-copilot.js');
+  assert.strictEqual(hookScriptName('node x/y/ralph-loop.js'), 'ralph-loop', 'basename without .js');
+  // Union across matcher groups, de-duped, order-preserved (Copilot has no matcher).
+  const names = collectHookNames([
+    { matcher: 'Edit|Write', hooks: [{ command: 'node a/foo.js' }, { command: 'node a/bar.js' }] },
+    { matcher: 'Bash', hooks: [{ command: 'node a/bar.js' }, { command: 'echo no-js' }] },
+  ]);
+  assert.deepStrictEqual(names, ['foo', 'bar'], 'union de-dups bar, drops non-js');
+  const w = wrapperScript('session-start');
+  assert.ok(w.includes('COPILOT=1 exec node "hooks/session-start.js"'), 'wrapper sets COPILOT=1 + execs node hook');
+  assert.ok(w.includes('git rev-parse --show-toplevel'), 'wrapper cds to repo root');
+  console.log('  ✓ hook name extraction + matcher-group union + bash wrapper');
 }
 
 // ── 4. Agent exporter: frontmatter build + placeholder resolution ────────────

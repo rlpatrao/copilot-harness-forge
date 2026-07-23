@@ -68,9 +68,18 @@ Claude Code and Copilot agree on hook semantics (exit codes, `decision:"block"`
 + `reason`, permission verdicts) but differ on the envelope for injected
 context. Claude Code wraps it in `hookSpecificOutput`; Copilot expects a flat
 object. [`hooks/lib/output.js`](hooks/lib/output.js) emits both — flat when the
-environment has `COPILOT=1`, wrapped otherwise. The generated hook commands set
-`COPILOT=1` themselves, so no manual export is needed for hooks. For the CLI
-session itself:
+environment has `COPILOT=1`, wrapped otherwise. Each generated hook is a bash
+wrapper under `.github/hooks/run/<name>.sh` that sets `COPILOT=1` and execs the
+node hook, so no manual export is needed.
+
+> **Hooks require a trusted folder.** Copilot only runs repo hooks when the
+> folder is trusted. On first interactive run, accept the trust prompt; for
+> headless use, seed `~/.copilot/settings.json` → `trustedFolders: ["<repo abs
+> path>"]`. Without trust, hooks silently don't fire. (Verified live: with trust
+> + the correct schema, a session drove `state/fire-log.jsonl` from 53 → 418
+> across 35 hooks.)
+
+For the CLI session itself:
 
 ```bash
 # headless, non-interactive (cloud-agent-compatible):
