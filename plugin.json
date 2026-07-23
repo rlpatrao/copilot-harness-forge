@@ -1,0 +1,20 @@
+{
+  "name": "harness-forge",
+  "description": "GAN-inspired autonomous SDLC harness — 20 agents, 53 skills, 36 hooks, a 12-gate quality ratchet, and a feature_list.json contract. Runs on Claude Code and GitHub Copilot CLI.",
+  "version": "3.0.0",
+  "license": "MIT",
+  "repository": "https://github.com/rlpatrao/copilot-harness-forge",
+  "keywords": [
+    "sdlc",
+    "autonomous-agents",
+    "verification",
+    "ratchet",
+    "copilot",
+    "claude-code"
+  ],
+  "agents": ".github/agents",
+  "skills": "skills",
+  "commands": ".github/commands",
+  "hooks": ".github/plugin-hooks.json",
+  "mcpServers": ".github/mcp.json"
+}

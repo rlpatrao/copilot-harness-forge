@@ -24,7 +24,26 @@ skills run under both runtimes. See
 [`brd/v3.5-copilot-port-analysis.md`](brd/v3.5-copilot-port-analysis.md) for the
 design.
 
-### Install
+### Use on your own project (plugin — recommended)
+
+The forge ships as a Copilot plugin (`plugin.json` at the root), the direct
+equivalent of Claude Code's `--plugin-dir`:
+
+```bash
+npm install -g @github/copilot
+git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
+mkdir my-app && cd my-app && git init
+copilot --plugin-dir ~/harness-forge     # accept the folder-trust prompt
+> /scaffold                              # or: say hi, then /auto
+```
+
+The plugin's hooks reference their bundled scripts via `${COPILOT_PLUGIN_ROOT}`,
+so they run from any project; Copilot passes *your* project's cwd in each hook's
+stdin, so the forge operates on your app. Verified live: skills load in-session
+and hooks fire (`session-start` + Stop-event hooks) in a separate project.
+`copilot plugin install rlpatrao/copilot-harness-forge` makes it permanent.
+
+### Install (forge development — regenerate the tree)
 
 Prerequisites: Node.js 22+, npm 10+, an active GitHub Copilot seat.
 

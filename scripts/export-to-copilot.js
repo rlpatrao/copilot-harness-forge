@@ -22,6 +22,7 @@ const steps = [
   'export-commands-to-copilot.js',
   'export-skills-to-copilot.js',
   'export-mcp-to-copilot.js',
+  'export-plugin-manifest.js',
 ];
 
 let failed = 0;

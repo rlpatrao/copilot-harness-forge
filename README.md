@@ -39,21 +39,26 @@ The headless invocation skips every interactive question — Q0 (source), Q1-Q3 
 
 ### On GitHub Copilot CLI (v3.5)
 
+The forge ships as a **Copilot plugin** — load it into *your own* project the same way Claude Code uses `--plugin-dir`. The forge stays in its own folder; your app lives in yours.
+
 ```bash
 # 1. Install the agentic Copilot CLI (needs Node 22+ and a Copilot seat)
 npm install -g @github/copilot
 
-# 2. Get the forge and generate the Copilot install tree
+# 2. Get the forge once (anywhere). It ships with the generated plugin tree.
 git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
-cd ~/harness-forge
-node scripts/export-to-copilot.js          # writes .github/{agents,skills,commands,hooks}/ + mcp.json
 
-# 3. Trust the folder so hooks can run (one-time), then start
-copilot                                    # accept the folder-trust prompt
-> say hi                                   # SessionStart context loads; /auto to build
+# 3. In YOUR project, load the forge as a plugin
+mkdir my-app && cd my-app && git init
+copilot --plugin-dir ~/harness-forge          # accept the folder-trust prompt (enables hooks)
+> /scaffold                                    # or: say hi, then /auto
 ```
 
-Everything under `.github/` is **generated** from the forge's source files (`agents/`, `skills/`, `commands/`, `hooks/`, `settings.json`) by the exporters — re-run `node scripts/export-to-copilot.js` after editing any of them and commit the tree. Full setup, the `COPILOT=1` behavior switch, folder-trust, model routing, and known limits are in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli) and [`AGENTS.md`](AGENTS.md).
+The forge's agents, 53 skills, hooks, and MCP config are now available in `my-app/`, and its hooks fire on *your* project (they resolve their bundled scripts via `${COPILOT_PLUGIN_ROOT}` — **live-verified** loading + firing in a separate project). To make the plugin permanent instead of passing `--plugin-dir` each time, add it to `enabledPlugins` in your Copilot config or `copilot plugin install rlpatrao/copilot-harness-forge`.
+
+> **Forge developers** re-run `node scripts/export-to-copilot.js` after editing any `agents/`, `skills/`, `commands/`, `hooks/`, or `settings.json` source and commit the regenerated `.github/` tree + `plugin.json`. End users don't need this — the plugin tree is committed.
+
+Full details — the `COPILOT=1` output switch, folder-trust, model routing, known limits — are in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli) and [`AGENTS.md`](AGENTS.md).
 
 ---
 
@@ -273,7 +278,14 @@ coding-agent:
 
 ## Running under GitHub Copilot CLI
 
-v3.5 ports the forge to **GitHub Copilot CLI** (`@github/copilot`, verified against 1.0.73). It's a *translation layer*, not a fork — the same hook logic, agents, skills, and commands run under both runtimes. Claude Code loads the forge as a plugin; Copilot loads a generated `.github/` install tree.
+v3.5 ports the forge to **GitHub Copilot CLI** (`@github/copilot`, verified against 1.0.73). It's a *translation layer*, not a fork — the same hook logic, agents, skills, and commands run under both runtimes.
+
+### Two ways to load it
+
+- **As a plugin (use on your own project — the recommended flow).** `plugin.json` at the forge root makes it a Copilot plugin. Run `copilot --plugin-dir ~/harness-forge` inside *your* project (or `copilot plugin install rlpatrao/copilot-harness-forge`). Hooks reference their bundled scripts via `${COPILOT_PLUGIN_ROOT}`, so they run from any project; the hook's stdin carries *your* project's cwd, so the forge operates on your app, not on itself. This is the direct equivalent of Claude Code's `--plugin-dir`.
+- **As a workspace (run the forge on itself — dogfood/self-hosted).** Copilot auto-discovers `.github/{agents,skills,commands,hooks}/` + `mcp.json` when you run `copilot` *inside the forge repo*. This is what the exporters primarily target.
+
+Both are **live-verified** against 1.0.73: loaded into a separate empty project via `--plugin-dir`, the forge's skills load in-session and its hooks fire (`session-start` + the Stop-event hooks), writing to *that project's* `state/`.
 
 ### Install & generate
 
@@ -292,6 +304,7 @@ The exporters (all under `scripts/`) map forge sources → the paths Copilot act
 | `.github/skills/*/SKILL.md` | `skills/*/` | `export-skills-to-copilot.js` |
 | `.github/commands/*.md` | `commands/*.md` | `export-commands-to-copilot.js` |
 | `.github/mcp.json` | `.claude-plugin/plugin.json` | `export-mcp-to-copilot.js` |
+| `plugin.json` + `.github/plugin-hooks.json` | manifest + consolidated hooks | `export-plugin-manifest.js` + `export-hooks-to-copilot.js` |
 
 Files under `.github/` carry a `# generated-from:` banner — **don't hand-edit them**; edit the forge source and re-run the exporter.
 

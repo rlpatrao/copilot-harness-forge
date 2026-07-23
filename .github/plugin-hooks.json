@@ -1,0 +1,202 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/session-start.sh",
+        "timeoutSec": 30
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/dangerous-patterns.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/reminder-injector.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/e2e-gate.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/feature-edit-guard.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/rule-gate.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/token-advisor.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/pre-bash-gate.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/concurrency-gate.sh",
+        "timeoutSec": 30
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/scope-directory.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/protect-env.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/detect-secrets.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/lint-on-save.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/typecheck.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/check-architecture.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/check-function-length.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/check-file-length.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/prompt-injection-detect.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/pii-scan.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/verify-on-save.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/protect-pdfs.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/pre-commit-gate.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/sprint-contract-gate.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/teammate-idle-check.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/network-egress.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/experiment-logger.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/cost-tracker.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/token-budget.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/budget-footer.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/task-completed.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/findings-collector.sh",
+        "timeoutSec": 30
+      }
+    ],
+    "preCompact": [
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/compaction-stage.sh",
+        "timeoutSec": 30
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/ralph-loop.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/instinct-extractor.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/correction-detector.sh",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/graph-refresh.sh",
+        "timeoutSec": 30
+      }
+    ],
+    "subagentStop": [
+      {
+        "type": "command",
+        "bash": "${COPILOT_PLUGIN_ROOT}/.github/hooks/run/concurrency-gate.sh",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

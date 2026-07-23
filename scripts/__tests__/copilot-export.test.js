@@ -67,9 +67,10 @@ const assert = require('assert');
   ]);
   assert.deepStrictEqual(names, ['foo', 'bar'], 'union de-dups bar, drops non-js');
   const w = wrapperScript('session-start');
-  assert.ok(w.includes('COPILOT=1 exec node "hooks/session-start.js"'), 'wrapper sets COPILOT=1 + execs node hook');
-  assert.ok(w.includes('git rev-parse --show-toplevel'), 'wrapper cds to repo root');
-  console.log('  ✓ hook name extraction + matcher-group union + bash wrapper');
+  assert.ok(w.includes('COPILOT=1 exec node "$ROOT/hooks/session-start.js"'), 'wrapper sets COPILOT=1 + execs the forge hook');
+  assert.ok(w.includes('COPILOT_PLUGIN_ROOT'), 'wrapper prefers plugin root (plugin mode)');
+  assert.ok(w.includes('git rev-parse --show-toplevel'), 'wrapper falls back to git root (self-hosted)');
+  console.log('  ✓ hook name extraction + matcher union + dual-mode bash wrapper');
 }
 
 // ── 4. Agent exporter: frontmatter build + placeholder resolution ────────────
