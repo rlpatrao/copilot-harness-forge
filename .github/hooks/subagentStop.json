@@ -1,0 +1,16 @@
+{
+  "$generated": "scripts/export-hooks-to-copilot.js from settings.json — do not edit by hand",
+  "$schema_note": "Copilot CLI hook config. If Copilot rejects the shape, adjust key names here (matchers/hooks) per `copilot help hooks` — BRD v3.5 §7.",
+  "event": "subagentStop",
+  "matchers": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/concurrency-gate.js"
+        }
+      ]
+    }
+  ]
+}

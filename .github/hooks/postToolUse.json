@@ -1,0 +1,125 @@
+{
+  "$generated": "scripts/export-hooks-to-copilot.js from settings.json — do not edit by hand",
+  "$schema_note": "Copilot CLI hook config. If Copilot rejects the shape, adjust key names here (matchers/hooks) per `copilot help hooks` — BRD v3.5 §7.",
+  "event": "postToolUse",
+  "matchers": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/scope-directory.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/protect-env.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/detect-secrets.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/lint-on-save.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/typecheck.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/check-architecture.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/check-function-length.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/check-file-length.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/prompt-injection-detect.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/pii-scan.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/verify-on-save.js"
+        }
+      ]
+    },
+    {
+      "matcher": "Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/protect-pdfs.js"
+        }
+      ]
+    },
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/pre-commit-gate.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/sprint-contract-gate.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/teammate-idle-check.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/network-egress.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/experiment-logger.js"
+        }
+      ]
+    },
+    {
+      "matcher": "Agent",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/cost-tracker.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/token-budget.js"
+        }
+      ]
+    },
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/budget-footer.js"
+        }
+      ]
+    },
+    {
+      "matcher": "todo|TodoWrite|task",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/task-completed.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/findings-collector.js"
+        }
+      ]
+    }
+  ]
+}

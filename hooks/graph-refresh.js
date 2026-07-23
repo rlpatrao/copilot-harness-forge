@@ -5,6 +5,7 @@
 
 // Cleanup-plan Phase 2 (2026-07-21): fire-log instrumentation.
 try { require('./lib/fire-log.js')('graph-refresh'); } catch (_) {}
+const { emit } = require('./lib/output.js'); // v3.5 Copilot dual-shape emitter
 
 // Stop-event hook (BRD v3.1 §4, v3.1.9). Drains state/dirty-files.jsonl
 // and calls scripts/build-code-graph.js --files <deduped list> to
@@ -75,7 +76,7 @@ const output = {
   },
 };
 
-process.stdout.write(JSON.stringify(output));
+emit(output);
 process.exit(0);
 
 function findProjectRoot(startDir) {

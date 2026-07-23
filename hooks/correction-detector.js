@@ -5,6 +5,7 @@
 
 // Cleanup-plan Phase 2 (2026-07-21): fire-log instrumentation.
 try { require('./lib/fire-log.js')('correction-detector'); } catch (_) {}
+const { emit } = require('./lib/output.js'); // v3.5 Copilot dual-shape emitter
 
 // Stop-event hook (BRD v3.3 §3.3). Runs AFTER instinct-extractor.js
 // in the same curation pass. Reads state/rejections.jsonl (produced
@@ -141,7 +142,7 @@ const output = {
     additionalContext: `**correction-detector (BRD v3.3):** wrote ${candidatesEmitted.length} new rule candidate(s) to state/rule-candidates/. Run \`/rules status\` to inspect and \`/rules promote-candidates\` to run them through the Critic.\n\n${candidatesEmitted.slice(0, 5).map(c => `- ${c.hash}: ${truncate(c.key, 80)}`).join('\n')}`,
   },
 };
-process.stdout.write(JSON.stringify(output));
+emit(output);
 process.exit(0);
 
 // -- helpers --

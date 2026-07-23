@@ -1,0 +1,79 @@
+{
+  "$generated": "scripts/export-hooks-to-copilot.js from settings.json — do not edit by hand",
+  "$schema_note": "Copilot CLI hook config. If Copilot rejects the shape, adjust key names here (matchers/hooks) per `copilot help hooks` — BRD v3.5 §7.",
+  "event": "preToolUse",
+  "matchers": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/dangerous-patterns.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/reminder-injector.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/e2e-gate.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/feature-edit-guard.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/rule-gate.js"
+        }
+      ]
+    },
+    {
+      "matcher": "Read|Glob|Grep",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/token-advisor.js"
+        }
+      ]
+    },
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/dangerous-patterns.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/reminder-injector.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/pre-bash-gate.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/token-advisor.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/rule-gate.js"
+        }
+      ]
+    },
+    {
+      "matcher": "Agent|Task",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/reminder-injector.js"
+        },
+        {
+          "type": "command",
+          "command": "COPILOT=1 node hooks/concurrency-gate.js"
+        }
+      ]
+    }
+  ]
+}

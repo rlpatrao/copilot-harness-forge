@@ -5,6 +5,7 @@
 
 // Cleanup-plan Phase 2 (2026-07-21): fire-log instrumentation.
 try { require('./lib/fire-log.js')('reminder-injector'); } catch (_) {}
+const { emit } = require('./lib/output.js'); // v3.5 Copilot dual-shape emitter
 
 // PreToolUse hook (BRD §4.2). Inspects the tool name + arguments and
 // injects a targeted reminder snippet from prompts/reminders/ when a
@@ -158,5 +159,5 @@ const output = {
   },
 };
 
-process.stdout.write(JSON.stringify(output));
+emit(output);
 process.exit(0);

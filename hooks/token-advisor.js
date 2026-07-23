@@ -5,6 +5,7 @@
 
 // Cleanup-plan Phase 2 (2026-07-21): fire-log instrumentation.
 try { require('./lib/fire-log.js')('token-advisor'); } catch (_) {}
+const { emit } = require('./lib/output.js'); // v3.5 Copilot dual-shape emitter
 
 // PreToolUse(Read|Bash|Glob|Grep) advisory hook (BRD v3.1 §4, v3.1.6).
 // Warns the agent — via additionalContext in the hook result — when a
@@ -115,7 +116,7 @@ const output = {
 state.warn_count++;
 try { fs.writeFileSync(stateFile, JSON.stringify(state)); } catch (_) {}
 
-process.stdout.write(JSON.stringify(output));
+emit(output);
 process.exit(0);
 
 function findProjectRoot(startDir) {

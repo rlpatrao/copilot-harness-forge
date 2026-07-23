@@ -5,6 +5,7 @@
 
 // Cleanup-plan Phase 2 (2026-07-21): fire-log instrumentation.
 try { require('./lib/fire-log.js')('budget-footer'); } catch (_) {}
+const { emit } = require('./lib/output.js'); // v3.5 Copilot dual-shape emitter
 
 // PostToolUse hook (BRD §3.7). Appends a budget-regime footer to every
 // tool result so the agent has a per-call signal of context budget
@@ -132,5 +133,5 @@ const output = {
   },
 };
 
-process.stdout.write(JSON.stringify(output));
+emit(output);
 process.exit(0);

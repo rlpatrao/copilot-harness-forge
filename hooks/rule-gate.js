@@ -5,6 +5,7 @@
 
 // Cleanup-plan Phase 2 (2026-07-21): fire-log instrumentation.
 try { require('./lib/fire-log.js')('rule-gate'); } catch (_) {}
+const { emit } = require('./lib/output.js'); // v3.5 Copilot dual-shape emitter
 
 // PreToolUse hook — the enforcement half of the TRACE compiled-rule
 // pipeline (BRD v3.3 §3.5). Loads state/compiled-rules.json and for
@@ -164,7 +165,7 @@ if (warns.length > 0) {
       additionalContext: `**Rule warnings (rule-gate, BRD v3.3):** the pending ${toolName}${relPath ? ` on \`${relPath}\`` : ''} matches ${warns.length} tentative rule(s):\n\n${lines.join('\n')}\n\n_These are TENTATIVE rules — they warn but do not block. If a warn is a false positive, use \`RULE_GATE_OVERRIDE=<rule_id>\` (increments the counter and blocks auto-promotion to confirmed/block until Critic re-validates)._`,
     },
   };
-  process.stdout.write(JSON.stringify(output));
+  emit(output);
 }
 
 process.exit(0);

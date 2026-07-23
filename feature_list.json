@@ -1338,6 +1338,15 @@
     "passes": false,
     "source_section": "Post-v3.4 lean review 2026-07-21",
     "depends_on": [],
-    "verification_artifact_path": "verification/cleanup-freeze.json"
+    "verification_artifact_path": "verification/cleanup-freeze.json",
+    "exceptions": [
+      {
+        "date": "2026-07-22",
+        "scope": "v3.5 Copilot port (brd/v3.5-copilot-port-analysis.md §9 increments 1–6)",
+        "granted_by": "repo owner (explicit override of the freeze for the Copilot translation layer)",
+        "rationale": "The port is a strategic distribution bet (forge installable as .github/agents/ rather than requiring `claude --plugin-dir`). It is a translation layer over existing machinery, not new referee machinery: the output adapter is backward-compatible (no behavior change unless COPILOT=1), and the exporters are pure code-gen with zero new feature_list entries. Recorded here per this doc's own §10 which sanctioned 'an explicit exception recorded in the freeze policy'. Does NOT lift the freeze for any other new hooks/agents/commands/skills.",
+        "does_not_lift": "The 10-real-passes gate still governs all non-port additions. Deletions remain always-allowed."
+      }
+    ]
   }
 ]

@@ -5,6 +5,7 @@
 
 // Cleanup-plan Phase 2 (2026-07-21): fire-log instrumentation.
 try { require('./lib/fire-log.js')('compaction-stage'); } catch (_) {}
+const { emit } = require('./lib/output.js'); // v3.5 Copilot dual-shape emitter
 
 // Pre-LLM-call compaction hook (BRD §4.3). Reads the SDK's PreCompact
 // event input, decides which stage applies, and emits a directive for
@@ -93,5 +94,5 @@ if (stage === 5) {
   directive.hookSpecificOutput.handoff_to = 'ralph-loop';
 }
 
-process.stdout.write(JSON.stringify(directive));
+emit(directive);
 process.exit(0);
