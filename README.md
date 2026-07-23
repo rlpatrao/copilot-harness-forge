@@ -18,7 +18,7 @@ Two ways to start — pick one based on whether you already have a BRD and archi
 
 ```bash
 # INTERACTIVE — the forge interviews you
-git clone https://github.com/rlpatrao/claude_harness_forge.git ~/harness-forge
+git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
 mkdir my-app && cd my-app
 claude --plugin-dir ~/harness-forge
 > /scaffold
@@ -26,7 +26,7 @@ claude --plugin-dir ~/harness-forge
 
 ```bash
 # HEADLESS — bring your own BRD + Architecture
-git clone https://github.com/rlpatrao/claude_harness_forge.git ~/harness-forge
+git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
 mkdir my-app && cd my-app
 cp /path/to/your/BRD.md ./BRD.md                      # or requirements.md / prd.md
 cp /path/to/your/architecture.md ./architecture.md    # or .dsl / .puml / .mmd (AAC)
@@ -44,7 +44,7 @@ The headless invocation skips every interactive question — Q0 (source), Q1-Q3 
 npm install -g @github/copilot
 
 # 2. Get the forge and generate the Copilot install tree
-git clone https://github.com/rlpatrao/claude_harness_forge.git ~/harness-forge
+git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
 cd ~/harness-forge
 node scripts/export-to-copilot.js          # writes .github/{agents,skills,commands,hooks}/ + mcp.json
 
@@ -53,7 +53,7 @@ copilot                                    # accept the folder-trust prompt
 > say hi                                   # SessionStart context loads; /auto to build
 ```
 
-Everything under `.github/` is **generated** from the forge's Claude-Code sources by the exporters — re-run `node scripts/export-to-copilot.js` after editing any agent/skill/command/hook and commit the tree. Full setup, the `COPILOT=1` behavior switch, folder-trust, model routing, and known limits are in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli) and [`AGENTS.md`](AGENTS.md).
+Everything under `.github/` is **generated** from the forge's source files (`agents/`, `skills/`, `commands/`, `hooks/`, `settings.json`) by the exporters — re-run `node scripts/export-to-copilot.js` after editing any of them and commit the tree. Full setup, the `COPILOT=1` behavior switch, folder-trust, model routing, and known limits are in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli) and [`AGENTS.md`](AGENTS.md).
 
 ---
 
@@ -403,13 +403,13 @@ Use this when: you're starting from a rough idea and want the forge to draw out 
 
 ```bash
 # 1. Clone the forge (one-time, anywhere on your filesystem)
-git clone https://github.com/rlpatrao/claude_harness_forge.git ~/claude-harness-forge
+git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
 
 # 2. Create your project folder
 mkdir my-app && cd my-app
 
 # 3. Start Claude Code with the forge loaded as a plugin
-claude --plugin-dir ~/claude-harness-forge
+claude --plugin-dir ~/harness-forge
 
 # 4. Scaffold — the forge asks questions
 > /scaffold
@@ -434,7 +434,7 @@ Use this when: you already have a written BRD and an architecture document, and 
 
 ```bash
 # 1. Clone the forge (one-time, anywhere on your filesystem)
-git clone https://github.com/rlpatrao/claude_harness_forge.git ~/claude-harness-forge
+git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
 
 # 2. Create your project folder
 mkdir my-app && cd my-app
@@ -449,7 +449,7 @@ cp /path/to/your/architecture.md ./architecture.md
 #     The forge auto-detects the format via file extension.)
 
 # 4. Start Claude Code with the forge loaded as a plugin
-claude --plugin-dir ~/claude-harness-forge
+claude --plugin-dir ~/harness-forge
 
 # 5. Scaffold with flags — no interactive questions asked
 > /scaffold --branch B --brd BRD.md --arch architecture.md \
@@ -483,7 +483,7 @@ claude --plugin-dir ~/claude-harness-forge
 Or headless via scaffold flags without a fixture:
 
 ```bash
-claude --plugin-dir ~/claude-harness-forge
+claude --plugin-dir ~/harness-forge
 > /scaffold --branch B --brd /path/to/BRD.md --arch /path/to/architecture.dsl \
             --name my-app --type saas --plugins minimal --yes
 > /architect --from-import --auto-approve
