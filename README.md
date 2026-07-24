@@ -39,26 +39,32 @@ The headless invocation skips every interactive question — Q0 (source), Q1-Q3 
 
 ### On GitHub Copilot CLI (v3.5)
 
-The forge ships as a **Copilot plugin** — load it into *your own* project the same way Claude Code uses `--plugin-dir`. The forge stays in its own folder; your app lives in yours.
+Use it two ways. **Install into your project** (persistent — recommended) so any Copilot session recognizes the forge with no flags; or **load as a plugin** (`--plugin-dir`, per-session) for a quick trial.
 
 ```bash
-# 1. Install the agentic Copilot CLI (needs Node 22+ and a Copilot seat)
+# 0. Install the agentic Copilot CLI (Node 22+, a Copilot seat) and get the forge
 npm install -g @github/copilot
-
-# 2. Get the forge once (anywhere). It ships with the generated plugin tree.
 git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
 
-# 3. In YOUR project, load the forge as a plugin
+# --- A) INSTALL INTO YOUR PROJECT (persistent) ---
 mkdir my-app && cd my-app && git init
-copilot --plugin-dir ~/harness-forge          # accept the folder-trust prompt (enables hooks)
-> /scaffold                                    # or: say hi, then /auto
+node ~/harness-forge/scripts/install-to-project.js .   # writes .github/ + .github/forge runtime
+git add .github && git commit -m "install harness-forge (Copilot)"
+copilot                                                # accept the folder-trust prompt → hooks enabled
+> /scaffold                                            # or: say hi, then /auto
+
+# --- B) OR LOAD AS A PLUGIN (per session) ---
+cd my-app
+copilot --plugin-dir ~/harness-forge                  # nothing copied in; only this session sees it
 ```
 
-The forge's agents, 53 skills, hooks, and MCP config are now available in `my-app/`, and its hooks fire on *your* project (they resolve their bundled scripts via `${COPILOT_PLUGIN_ROOT}` — **live-verified** loading + firing in a separate project). To make the plugin permanent instead of passing `--plugin-dir` each time, add it to `enabledPlugins` in your Copilot config or `copilot plugin install rlpatrao/copilot-harness-forge`.
+**Install (A)** copies the forge's agents, 53 skills, commands, MCP config, and a self-contained hook runtime (`.github/forge/`) into your repo, so a plain `copilot` — or the VS Code UI / cloud agent, for the instruction/agent/skill parts — recognizes it with **no `--plugin-dir`**. **Plugin (B)** copies nothing; only the exact session that passes the flag sees it.
 
-> **Forge developers** re-run `node scripts/export-to-copilot.js` after editing any `agents/`, `skills/`, `commands/`, `hooks/`, or `settings.json` source and commit the regenerated `.github/` tree + `plugin.json`. End users don't need this — the plugin tree is committed.
+Both are **live-verified against Copilot 1.0.73**: loaded into a *separate empty project*, the forge's skills load in-session and its hooks fire (`session-start` + the Stop-event hooks), writing to *that project's* `state/`.
 
-Full details — the `COPILOT=1` output switch, folder-trust, model routing, known limits — are in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli) and [`AGENTS.md`](AGENTS.md).
+> **Two one-time notes.** (1) **Trust:** Copilot only runs hooks in a trusted folder — accept the prompt on first `copilot`, or add the path to `~/.copilot/config.json` `trustedFolders`. (2) **Hooks are CLI-only:** the VS Code UI and cloud agent read instructions/agents/skills but do **not** run CLI hooks (a Copilot platform limit) — see the surface table in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli).
+
+> **Forge developers** re-run `node scripts/export-to-copilot.js` after editing any `agents/`, `skills/`, `commands/`, `hooks/`, or `settings.json` source and commit the regenerated `.github/` tree + `plugin.json`.
 
 ---
 
@@ -280,12 +286,21 @@ coding-agent:
 
 v3.5 ports the forge to **GitHub Copilot CLI** (`@github/copilot`, verified against 1.0.73). It's a *translation layer*, not a fork — the same hook logic, agents, skills, and commands run under both runtimes.
 
-### Two ways to load it
+### Three ways to load it
 
-- **As a plugin (use on your own project — the recommended flow).** `plugin.json` at the forge root makes it a Copilot plugin. Run `copilot --plugin-dir ~/harness-forge` inside *your* project (or `copilot plugin install rlpatrao/copilot-harness-forge`). Hooks reference their bundled scripts via `${COPILOT_PLUGIN_ROOT}`, so they run from any project; the hook's stdin carries *your* project's cwd, so the forge operates on your app, not on itself. This is the direct equivalent of Claude Code's `--plugin-dir`.
-- **As a workspace (run the forge on itself — dogfood/self-hosted).** Copilot auto-discovers `.github/{agents,skills,commands,hooks}/` + `mcp.json` when you run `copilot` *inside the forge repo*. This is what the exporters primarily target.
+- **Installed into your project (persistent — recommended).** `node ~/harness-forge/scripts/install-to-project.js <dir>` copies the forge's `.github/{agents,skills,commands,hooks}/` + `mcp.json` + a self-contained runtime under `.github/forge/` into your repo. A plain `copilot` (no flags) then loads it. Hook wrappers self-locate (`$BASH_SOURCE`-relative) to `.github/forge/hooks/`, and each hook targets your project via the event stdin `cwd`. **Verified:** plain `copilot` in an installed empty project fires the forge hooks into that project's `state/`.
+- **As a plugin (per session).** `plugin.json` at the forge root makes it a Copilot plugin: `copilot --plugin-dir ~/harness-forge` (or `copilot plugin install rlpatrao/copilot-harness-forge`). Copies nothing into the project; only that session sees it. **Verified:** hooks fire in a separate project via `--plugin-dir`.
+- **As a workspace (dogfood/self-hosted).** Copilot auto-discovers the forge repo's own `.github/` when you run `copilot` inside it.
 
-Both are **live-verified** against 1.0.73: loaded into a separate empty project via `--plugin-dir`, the forge's skills load in-session and its hooks fire (`session-start` + the Stop-event hooks), writing to *that project's* `state/`.
+### What works on which surface
+
+| Surface | instructions / agents / skills | CLI **hooks** (12-gate enforcement) |
+|---|---|---|
+| Copilot CLI (installed or plugin) | yes | **yes** (folder must be trusted) |
+| VS Code Copilot (UI) | yes | **no** — hooks are a CLI feature |
+| Cloud coding agent | yes | **no** — no CLI hook runtime |
+
+Two one-time requirements for hooks: the folder must be **trusted** (interactive prompt, or `~/.copilot/config.json` `trustedFolders`), and hooks run **only in the Copilot CLI** — the IDE UI and cloud agent pick up everything except the hook-based gates.
 
 ### Install & generate
 

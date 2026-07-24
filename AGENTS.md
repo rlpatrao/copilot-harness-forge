@@ -24,24 +24,33 @@ skills run under both runtimes. See
 [`brd/v3.5-copilot-port-analysis.md`](brd/v3.5-copilot-port-analysis.md) for the
 design.
 
-### Use on your own project (plugin — recommended)
+### Use on your own project
 
-The forge ships as a Copilot plugin (`plugin.json` at the root), the direct
-equivalent of Claude Code's `--plugin-dir`:
+Two ways. **Install** (persistent — any Copilot session recognizes it) or
+**plugin** (`--plugin-dir`, per session).
 
 ```bash
 npm install -g @github/copilot
 git clone https://github.com/rlpatrao/copilot-harness-forge.git ~/harness-forge
+
+# A) INSTALL INTO YOUR PROJECT (persistent, recommended)
 mkdir my-app && cd my-app && git init
-copilot --plugin-dir ~/harness-forge     # accept the folder-trust prompt
-> /scaffold                              # or: say hi, then /auto
+node ~/harness-forge/scripts/install-to-project.js .   # .github/ + .github/forge runtime
+git add .github && git commit -m "install harness-forge (Copilot)"
+copilot                                                # trust the folder → hooks enabled
+> /scaffold
+
+# B) OR PLUGIN (per session — copies nothing in)
+copilot --plugin-dir ~/harness-forge
 ```
 
-The plugin's hooks reference their bundled scripts via `${COPILOT_PLUGIN_ROOT}`,
-so they run from any project; Copilot passes *your* project's cwd in each hook's
-stdin, so the forge operates on your app. Verified live: skills load in-session
-and hooks fire (`session-start` + Stop-event hooks) in a separate project.
-`copilot plugin install rlpatrao/copilot-harness-forge` makes it permanent.
+Both are verified live: the forge's skills load in-session and its hooks fire
+(`session-start` + Stop-event hooks) in a *separate* project, writing to that
+project's `state/`. Hook wrappers self-locate (`$BASH_SOURCE`-relative), and each
+hook targets your project via the event stdin `cwd`. Two one-time notes: the
+folder must be **trusted** (prompt, or `~/.copilot/config.json` `trustedFolders`),
+and **CLI hooks run only in the Copilot CLI** — the IDE UI / cloud agent read
+instructions/agents/skills but not the hooks.
 
 ### Install (forge development — regenerate the tree)
 
