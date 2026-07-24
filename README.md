@@ -62,7 +62,7 @@ copilot --plugin-dir ~/harness-forge                  # nothing copied in; only 
 
 Both are **live-verified against Copilot 1.0.73**: loaded into a *separate empty project*, the forge's skills load in-session and its hooks fire (`session-start` + the Stop-event hooks), writing to *that project's* `state/`.
 
-> **Two one-time notes.** (1) **Trust:** Copilot only runs hooks in a trusted folder — accept the prompt on first `copilot`, or add the path to `~/.copilot/config.json` `trustedFolders`. (2) **Hooks are CLI-only:** the VS Code UI and cloud agent read instructions/agents/skills but do **not** run CLI hooks (a Copilot platform limit) — see the surface table in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli).
+> **Two one-time notes.** (1) **Trust:** Copilot only runs hooks in a trusted folder — accept the prompt on first `copilot`, or add the path to `~/.copilot/config.json` `trustedFolders`. (2) **Hooks run in the Copilot CLI runtime:** whenever the CLI drives the loop (standalone *or* connected to VS Code via `--acp`/`/ide`) the 12-gate hooks fire; the *native* VS Code Copilot agent and the cloud agent are different runtimes that read instructions/agents/skills but not CLI hooks — see the surface table in [Running under GitHub Copilot CLI](#running-under-github-copilot-cli).
 
 > **Forge developers** re-run `node scripts/export-to-copilot.js` after editing any `agents/`, `skills/`, `commands/`, `hooks/`, or `settings.json` source and commit the regenerated `.github/` tree + `plugin.json`.
 
@@ -294,13 +294,18 @@ v3.5 ports the forge to **GitHub Copilot CLI** (`@github/copilot`, verified agai
 
 ### What works on which surface
 
-| Surface | instructions / agents / skills | CLI **hooks** (12-gate enforcement) |
+| Runtime | instructions / agents / skills | CLI **hooks** (12-gate enforcement) |
 |---|---|---|
 | Copilot CLI (installed or plugin) | yes | **yes** (folder must be trusted) |
-| VS Code Copilot (UI) | yes | **no** — hooks are a CLI feature |
+| Copilot CLI connected to VS Code (`--acp` / `/ide`) | yes | **yes** — the CLI is still the runtime |
+| VS Code Copilot agent (native, no CLI) | yes | **no** — hooks aren't part of that runtime |
 | Cloud coding agent | yes | **no** — no CLI hook runtime |
 
-Two one-time requirements for hooks: the folder must be **trusted** (interactive prompt, or `~/.copilot/config.json` `trustedFolders`), and hooks run **only in the Copilot CLI** — the IDE UI and cloud agent pick up everything except the hook-based gates.
+The dividing line for hooks is **which runtime drives the agent loop**, not terminal-vs-GUI. Hooks (the `preToolUse` / `postToolUse` / `sessionStart` lifecycle, block/allow, running local scripts) are implemented in the **Copilot CLI's** runtime — so they fire whenever the CLI is in control, including when it's connected to VS Code. The **native** VS Code Copilot agent and the cloud coding agent are *different* runtimes that read declarative config (instructions, agents, skills, MCP) but have no CLI-hook lifecycle, so the 12-gate enforcement doesn't run there.
+
+Two one-time requirements where hooks *do* run: the folder must be **trusted** (interactive prompt, or `~/.copilot/config.json` `trustedFolders`).
+
+> Verified: hooks fire in the Copilot CLI (installed + plugin). The native-IDE / cloud-agent rows are from Copilot's documented architecture, not a live test here — GitHub could add hook-equivalents to those runtimes over time.
 
 ### Install & generate
 

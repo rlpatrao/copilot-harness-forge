@@ -49,8 +49,10 @@ Both are verified live: the forge's skills load in-session and its hooks fire
 project's `state/`. Hook wrappers self-locate (`$BASH_SOURCE`-relative), and each
 hook targets your project via the event stdin `cwd`. Two one-time notes: the
 folder must be **trusted** (prompt, or `~/.copilot/config.json` `trustedFolders`),
-and **CLI hooks run only in the Copilot CLI** — the IDE UI / cloud agent read
-instructions/agents/skills but not the hooks.
+and **hooks run in the Copilot CLI runtime** — whenever the CLI drives the loop
+(standalone or connected to VS Code via `--acp`/`/ide`); the native VS Code
+Copilot agent and the cloud agent are different runtimes that read
+instructions/agents/skills but not CLI hooks.
 
 ### Install (forge development — regenerate the tree)
 
