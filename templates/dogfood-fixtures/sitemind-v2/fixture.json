@@ -1,0 +1,261 @@
+{
+  "name": "sitemind-v2",
+  "description": "SiteMind v2 \u2014 RAG AI chatbot builder: site scraping, realtime live-page answers, Jev/LLM intent detection, current-session semantic + episodic memory, custom Q&A. Lean FastAPI + Postgres/pgvector + React monolith.",
+  "project_type": "saas",
+  "seed_features": [
+    {
+      "id": "f01-platform-shell",
+      "category": "feature",
+      "description": "Register/login with JWT, dashboard, deep-link-safe routing, /api/health, docker compose + Makefile",
+      "steps": [
+        "Register a new owner and log in via the UI",
+        "Dashboard shows empty state",
+        "Refresh on /bots/{id}/analytics stays on that page",
+        "GET /api/health returns 200",
+        "Playwright E2E test for this feature passes and writes verification/f01-platform-shell.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC1",
+      "depends_on": [],
+      "verification_artifact_path": "verification/f01-platform-shell.json"
+    },
+    {
+      "id": "f02-builder-wizard",
+      "category": "feature",
+      "description": "7-step bot builder wizard that persists each step and never skips (website, crawl, documents, Q&A, live sources, personality, test & embed)",
+      "steps": [
+        "Create a bot from the fixture site URL",
+        "Each wizard step persists and Back/Next never skip",
+        "Final step shows chat preview and embed snippet",
+        "Playwright E2E test for this feature passes and writes verification/f02-builder-wizard.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC2",
+      "depends_on": [
+        "f01-platform-shell"
+      ],
+      "verification_artifact_path": "verification/f02-builder-wizard.json"
+    },
+    {
+      "id": "f03-site-scraper",
+      "category": "feature",
+      "description": "robots/sitemap/BFS discovery, httpx fetch, JS-render fallback, main-content extraction, heading-aware chunking, live crawl progress, recrawl",
+      "steps": [
+        "Crawl progress reaches done with >= 8 pages indexed",
+        "JS-rendered page is indexed",
+        "/private/ (robots-disallowed) is not crawled",
+        "Playwright E2E test for this feature passes and writes verification/f03-site-scraper.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC2",
+      "depends_on": [
+        "f02-builder-wizard"
+      ],
+      "verification_artifact_path": "verification/f03-site-scraper.json"
+    },
+    {
+      "id": "f04-documents",
+      "category": "feature",
+      "description": "Upload PDF/DOCX/TXT/MD, chunk + index, delete",
+      "steps": [
+        "Upload the allergen PDF",
+        "Ask about allergens",
+        "Answer cites the PDF",
+        "Playwright E2E test for this feature passes and writes verification/f04-documents.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC11",
+      "depends_on": [
+        "f05-hybrid-retrieval"
+      ],
+      "verification_artifact_path": "verification/f04-documents.json"
+    },
+    {
+      "id": "f05-hybrid-retrieval",
+      "category": "feature",
+      "description": "pgvector + full-text hybrid retrieval with RRF, embedding providers voyage|local|hash",
+      "steps": [
+        "Retrieval for 'Saturday hours' returns the hours page chunk first",
+        "Playwright E2E test for this feature passes and writes verification/f05-hybrid-retrieval.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC3",
+      "depends_on": [
+        "f03-site-scraper"
+      ],
+      "verification_artifact_path": "verification/f05-hybrid-retrieval.json"
+    },
+    {
+      "id": "f06-chat-answering",
+      "category": "feature",
+      "description": "Streaming SSE chat with numbered citations, anthropic|mock LLM providers, grounding rule",
+      "steps": [
+        "Ask 'What time do you open on Saturday?'",
+        "Answer contains the Saturday hours",
+        "Citation links to the hours page",
+        "Playwright E2E test for this feature passes and writes verification/f06-chat-answering.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC3",
+      "depends_on": [
+        "f05-hybrid-retrieval"
+      ],
+      "verification_artifact_path": "verification/f06-chat-answering.json"
+    },
+    {
+      "id": "f07-custom-qna",
+      "category": "feature",
+      "description": "Authoritative custom Q&A: direct answer above threshold, else injected as authoritative context; CRUD + CSV",
+      "steps": [
+        "Add gift card Q&A pair",
+        "Ask 'can I buy a gift card'",
+        "Answer is the owner's answer with source Custom Q&A",
+        "Playwright E2E test for this feature passes and writes verification/f07-custom-qna.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC4",
+      "depends_on": [
+        "f06-chat-answering"
+      ],
+      "verification_artifact_path": "verification/f07-custom-qna.json"
+    },
+    {
+      "id": "f08-intent-detection",
+      "category": "feature",
+      "description": "DecisionProvider jev|llm|mock, six intents + flags, deterministic routing, intent chip in UI",
+      "steps": [
+        "Realtime question shows intent chip realtime",
+        "Smalltalk skips retrieval",
+        "Out-of-scope declines",
+        "Playwright E2E test for this feature passes and writes verification/f08-intent-detection.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC5",
+      "depends_on": [
+        "f06-chat-answering"
+      ],
+      "verification_artifact_path": "verification/f08-intent-detection.json"
+    },
+    {
+      "id": "f09-realtime-live-pages",
+      "category": "feature",
+      "description": "Live sources: select, fetch with timeout + JS fallback, cache TTL, last-crawl fallback, live badge",
+      "steps": [
+        "Mark /events as live",
+        "Change events page content",
+        "Ask about events this week",
+        "Answer includes new event with live badge, no recrawl",
+        "Playwright E2E test for this feature passes and writes verification/f09-realtime-live-pages.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC5",
+      "depends_on": [
+        "f08-intent-detection"
+      ],
+      "verification_artifact_path": "verification/f09-realtime-live-pages.json"
+    },
+    {
+      "id": "f10-session-memory",
+      "category": "feature",
+      "description": "Current-session semantic facts + episodic summaries, memory panel, memory inspector, expiry purge",
+      "steps": [
+        "Say 'Hi, I'm Priya and we're a group of 4'",
+        "Memory panel shows name=Priya, party_size=4",
+        "Later answer uses both facts",
+        "New session knows neither",
+        "Playwright E2E test for this feature passes and writes verification/f10-session-memory.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC6",
+      "depends_on": [
+        "f06-chat-answering"
+      ],
+      "verification_artifact_path": "verification/f10-session-memory.json"
+    },
+    {
+      "id": "f11-lead-capture",
+      "category": "feature",
+      "description": "Lead intent shows prefilled lead form; leads stored and listed in analytics",
+      "steps": [
+        "Ask for a catering quote",
+        "Lead form appears prefilled",
+        "Submit adds row in Analytics > Leads",
+        "Playwright E2E test for this feature passes and writes verification/f11-lead-capture.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC7",
+      "depends_on": [
+        "f08-intent-detection",
+        "f10-session-memory"
+      ],
+      "verification_artifact_path": "verification/f11-lead-capture.json"
+    },
+    {
+      "id": "f12-guardrails",
+      "category": "feature",
+      "description": "Confidence scoring + guardrail events (no_context, no_citation, low_confidence, out_of_scope) + Guardrails tab",
+      "steps": [
+        "Ask 'Do you sell car insurance?'",
+        "Bot declines",
+        "Guardrail event listed",
+        "Playwright E2E test for this feature passes and writes verification/f12-guardrails.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC8",
+      "depends_on": [
+        "f06-chat-answering"
+      ],
+      "verification_artifact_path": "verification/f12-guardrails.json"
+    },
+    {
+      "id": "f13-analytics",
+      "category": "feature",
+      "description": "Conversations, intents, confidence, unanswered questions with Add to Q&A, leads, live fetch stats",
+      "steps": [
+        "Unanswered list contains the car insurance question",
+        "Add to Q&A creates a pair",
+        "Playwright E2E test for this feature passes and writes verification/f13-analytics.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC8",
+      "depends_on": [
+        "f12-guardrails"
+      ],
+      "verification_artifact_path": "verification/f13-analytics.json"
+    },
+    {
+      "id": "f14-embed-widget",
+      "category": "feature",
+      "description": "widget.js launcher + iframe on any origin, public rate-limited chat API, allowed domains",
+      "steps": [
+        "Load a plain HTML page on another origin with the snippet",
+        "Open launcher and ask AC3 question",
+        "Cited answer shown",
+        "Playwright E2E test for this feature passes and writes verification/f14-embed-widget.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC9",
+      "depends_on": [
+        "f06-chat-answering"
+      ],
+      "verification_artifact_path": "verification/f14-embed-widget.json"
+    },
+    {
+      "id": "f15-billing-plans",
+      "category": "feature",
+      "description": "Free/Pro/Business plans, server-enforced limits, usage meter, Stripe or mock checkout",
+      "steps": [
+        "Free plan blocks second bot with upgrade link",
+        "Mock upgrade to Pro",
+        "Second bot creation succeeds",
+        "Playwright E2E test for this feature passes and writes verification/f15-billing-plans.json"
+      ],
+      "passes": false,
+      "source_section": "sitemind-v2 BRD AC10",
+      "depends_on": [
+        "f02-builder-wizard"
+      ],
+      "verification_artifact_path": "verification/f15-billing-plans.json"
+    }
+  ]
+}
