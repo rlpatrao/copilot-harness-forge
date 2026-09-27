@@ -23,7 +23,7 @@
 #   scripts/dogfood-setup.sh [--target <dir>] [--fixture <name>]
 #
 # Defaults:
-#   --target ./test-projects/salary-dashboard
+#   --target ./test-projects/<fixture>
 #   --fixture salary-dashboard
 #
 # Exit codes:
@@ -33,7 +33,7 @@
 set -euo pipefail
 
 FORGE="$(cd "$(dirname "$0")/.." && pwd)"
-TARGET="${FORGE}/test-projects/salary-dashboard"
+TARGET=""
 FIXTURE="salary-dashboard"
 
 while [[ $# -gt 0 ]]; do
@@ -56,6 +56,20 @@ if [[ ! -f "${FIXTURE_DIR}/BRD.md" ]]; then
   echo "ERROR: no BRD.md in fixture: $FIXTURE_DIR" >&2
   exit 1
 fi
+[[ -z "$TARGET" ]] && TARGET="${FORGE}/test-projects/${FIXTURE}"
+
+# Optional per-fixture metadata (name, description, project_type, seed_features).
+# Absent -> the salary-dashboard defaults below are used.
+FIXTURE_META="${FIXTURE_DIR}/fixture.json"
+fixture_field() {
+  [[ -f "$FIXTURE_META" ]] || return 0
+  python3 -c 'import json,sys; v=json.load(open(sys.argv[1])).get(sys.argv[2]); print(v if isinstance(v,str) else json.dumps(v, indent=2)) if v is not None else None' "$FIXTURE_META" "$1"
+}
+PROJ_NAME="$(fixture_field name)"; PROJ_NAME="${PROJ_NAME:-salary-dashboard}"
+PROJ_DESC="$(fixture_field description)"
+PROJ_DESC="${PROJ_DESC:-Employee salary dashboard + NL Q&A chatbot over US DOL OFLC/H1B LCA disclosure data. Headless dogfood target (BRD v3.4).}"
+PROJ_TYPE="$(fixture_field project_type)"; PROJ_TYPE="${PROJ_TYPE:-saas}"
+SEED_FEATURES="$(fixture_field seed_features)"
 
 # --- 1. Prepare target dir ---
 mkdir -p "$TARGET"
@@ -84,9 +98,9 @@ cp "${FORGE}/settings.json" ".claude/settings.json"
 # --- 4. project-manifest.json ---
 cat > project-manifest.json <<JSON
 {
-  "name": "salary-dashboard",
-  "description": "Employee salary dashboard + NL Q&A chatbot over US DOL OFLC/H1B LCA disclosure data. Headless dogfood target (BRD v3.4).",
-  "project_type": "saas",
+  "name": "${PROJ_NAME}",
+  "description": $(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$PROJ_DESC"),
+  "project_type": "${PROJ_TYPE}",
   "stack": { "backend": null, "frontend": null, "database": null, "deployment": null },
   "evaluation": { "api_base_url": null, "ui_base_url": null, "health_check": null },
   "execution": {
@@ -114,9 +128,9 @@ cat > project-manifest.json <<JSON
 JSON
 
 # --- 5. calibration-profile.json ---
-cat > calibration-profile.json <<'JSON'
+cat > calibration-profile.json <<JSON
 {
-  "project_type": "saas",
+  "project_type": "${PROJ_TYPE}",
   "ui_standards": {
     "responsive_required": true,
     "mobile_breakpoint": 375,
@@ -264,7 +278,9 @@ RULES
 fi
 
 # --- 10. Seed feature_list.json (one entry — the dogfood target itself) ---
-if [[ ! -f feature_list.json ]] || [[ $(cat feature_list.json) == '[]' ]]; then
+if [[ -n "$SEED_FEATURES" ]] && { [[ ! -f feature_list.json ]] || [[ $(cat feature_list.json) == '[]' ]]; }; then
+  printf '%s\n' "$SEED_FEATURES" > feature_list.json
+elif [[ ! -f feature_list.json ]] || [[ $(cat feature_list.json) == '[]' ]]; then
   cat > feature_list.json <<'FL'
 [
   {
@@ -289,10 +305,10 @@ fi
 if [[ ! -f harness-progress.txt ]]; then
   cat > harness-progress.txt <<EOF
 ================================================================
-salary-dashboard — harness progress log
+${PROJ_NAME} — harness progress log
 ================================================================
 
-Project: salary-dashboard (headless dogfood, BRD v3.4)
+Project: ${PROJ_NAME} (headless dogfood, BRD v3.4)
 Source: ${FORGE}/templates/dogfood-fixtures/${FIXTURE}
 Set up by: scripts/dogfood-setup.sh at ${NOW}
 
@@ -300,7 +316,7 @@ Initial state:
 - BRD imported from ${FIXTURE_DIR}/BRD.md
 - Architecture imported from ${ARCH_SRC} (${ARCH_FMT})
 - architecture-approved.flag written (auto-approved by dogfood-setup)
-- feature_list.json seeded with a single entry: dogfood-mvp-shell
+- feature_list.json seeded ($(python3 -c 'import json; print(", ".join(f["id"] for f in json.load(open("feature_list.json"))))'))
 - state/{compiled-rules,learned-rules}.md seeded empty
 
 Next: an interactive Claude Code session started with

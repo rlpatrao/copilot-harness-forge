@@ -1,0 +1,22 @@
+{
+  "name": "jev-ticket-triage",
+  "description": "TriageDesk — support-ticket triage using TypeSafe Jev (System One model): one typed fan-out decision call per ticket, confidence-band routing, human review queue, calibration on own labels. Headless dogfood target.",
+  "project_type": "saas",
+  "seed_features": [
+    {
+      "id": "dogfood-mvp-shell",
+      "category": "feature",
+      "description": "Bootstrap the TriageDesk MVP shell: FastAPI backend + Next.js frontend + SQLite stub + MockJevProvider behind the DecisionProvider interface. Sanity check that /auto can drive scaffold-import artifacts through generator + evaluator + E2E gate.",
+      "steps": [
+        "Backend serves GET /health returning 200 OK with a JSON body {status: ok, provider: mock}",
+        "POST /tickets with body 'I was charged twice this month, please refund the duplicate' returns a decision with team=billing and a confidence in [0,1] for all six questions (DECISION_PROVIDER=mock, no network)",
+        "Frontend renders the review queue page containing text 'TriageDesk' and the shadow-mode banner",
+        "Playwright/Puppeteer MCP session verifies the review queue page loads and /health returns 200"
+      ],
+      "passes": false,
+      "source_section": "Jev ticket-triage fixture BRD AC1 + AC7",
+      "depends_on": [],
+      "verification_artifact_path": "verification/dogfood-mvp-shell.json"
+    }
+  ]
+}
